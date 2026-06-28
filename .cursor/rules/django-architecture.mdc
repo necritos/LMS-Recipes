@@ -1,0 +1,58 @@
+---
+description: Arquitectura Django en capas — servicios, selectors, modelos
+globs: apps/**/*.py,config/**/*.py
+alwaysApply: false
+---
+
+# Arquitectura en capas (BEDERR-style)
+
+## Responsabilidades
+
+| Capa | Ubicación | Hace | No hace |
+|------|-----------|------|---------|
+| API | `api/views.py`, `serializers.py` | Validar I/O, HTTP status | Lógica de negocio |
+| Servicios | `services/*.py` | Casos de uso, `@transaction.atomic` | Importar `Request` |
+| Selectors | `selectors.py` | Queries de lectura optimizadas | Escrituras |
+| Modelos | `models.py` | Invariantes, FK, constraints | Llamadas HTTP |
+
+## Patrón obligatorio para escrituras
+
+```python
+# ✅ CORRECTO — view delega al servicio
+class CheckoutView(APIView):
+    def post(self, request):
+        serializer = CheckoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        session = checkout_service.create_stripe_session(
+            user=request.user,
+            cart_items=serializer.validated_data["items"],
+        )
+        return Response({"data": {"session_url": session.url}})
+
+# ❌ INCORRECTO — lógica en la view
+class CheckoutView(APIView):
+    def post(self, request):
+        order = Order.objects.create(user=request.user, ...)
+        stripe.checkout.Session.create(...)
+```
+
+## Modelos base (common)
+- Heredar de `UUIDModel` + `TimeStampedModel`
+- UUID como PK en todas las entidades de negocio
+- Slugs únicos para SEO (`Course.slug`, `Recipe.slug`)
+
+## Estructura por app
+
+```
+apps/<app>/
+├── models.py
+├── selectors.py
+├── services/
+├── api/{public,admin,me}/
+└── tests/
+```
+
+## Excepciones de dominio
+
+Usar `BusinessError(code, message, http_status)` de `common.exceptions`.
+Códigos en inglés (`ACCESS_EXPIRED`), mensajes en español.

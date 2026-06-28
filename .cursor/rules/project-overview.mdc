@@ -1,0 +1,42 @@
+---
+description: Contexto global del proyecto Recetario LMS + E-commerce
+alwaysApply: true
+---
+
+# Recetario Backend — Contexto del proyecto
+
+**Alcance: solo backend y APIs REST.** No desarrollar frontend, UI, HTML de app, CSS, JavaScript ni componentes visuales.
+
+Plataforma **LMS + E-commerce** expuesta vía Django/DRF para venta de cursos y recetas. El frontend vive en `RECETARIO-FRONTEND` (repo separado).
+
+## Stack
+- Django 5 + DRF + SimpleJWT
+- **Local:** SQLite (default Django, sin Postgres obligatorio)
+- **Prod:** PostgreSQL 16 en Digital Ocean Managed Database
+- Celery + Redis (emails, expiración accesos, webhooks)
+- Stripe (pagos), Bunny.net Stream (URLs firmadas), DO Spaces (media)
+- Referencia arquitectónica: BEDERR-BACKEND (capas, servicios, envelope API)
+
+## Apps del dominio
+- `common` — base models, permisos, paginación, errores
+- `accounts` — UserAccount, StaffUser, JWT, Google OAuth
+- `catalog` — Course, Recipe, Category, Language
+- `commerce` — Cart, Order, Stripe
+- `content` — Module, Lesson, VideoAccessToken
+- `notifications` — emails Celery (templates email sí; UI no)
+- `analytics` — endpoints JSON de dashboard admin
+
+## Reglas de negocio críticas
+1. Cursos: acceso **1 año** desde compra
+2. Recetas: acceso **lifetime o 1 año** (configurable)
+3. Videos: API devuelve URL firmada; nunca URL directa pública
+4. Acceso se otorga **solo** tras webhook Stripe confirmado
+5. Multi-idioma: filtrar catálogo por idioma activo
+
+## Prohibido
+- Desarrollar cualquier frontend o interfaz gráfica
+- Lógica de negocio en views/serializers (usar `services/`)
+- Hardcodear secrets o keys de Stripe/Bunny
+- Usar PostgreSQL en local por defecto (SQLite es el default)
+- Exponer `video_id` de Bunny sin verificar Purchase activo
+- Implementar reproductor de video, landing page o paneles visuales

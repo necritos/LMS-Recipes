@@ -1,0 +1,8 @@
+Hola {{ user_name }},
+
+¡Bienvenido/a a {{ site_name }}!
+
+Tu cuenta ha sido creada correctamente. Ya puedes acceder a cursos y recetas desde la plataforma.
+
+Saludos,
+El equipo de {{ site_name }}

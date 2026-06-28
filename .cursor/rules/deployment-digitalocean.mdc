@@ -1,0 +1,56 @@
+---
+description: Despliegue en Digital Ocean — App Platform, Spaces, CI/CD
+globs: Dockerfile,deploy/**/*,docker-compose.yml,.github/workflows/**/*
+alwaysApply: false
+---
+
+# Despliegue Digital Ocean
+
+## Infraestructura objetivo
+
+| Servicio DO | Uso |
+|-------------|-----|
+| App Platform | Django API (Gunicorn) + Celery Worker |
+| Managed PostgreSQL | BD producción |
+| Managed Redis | Celery broker |
+| Spaces | Media/imágenes (S3-compatible) |
+
+## Dockerfile
+- Base: `python:3.12-slim`
+- Install: `pip install -e ".[prod]"` (gunicorn, whitenoise)
+- `collectstatic` en build con dummy secrets
+- Entrypoint: `deploy/docker-entrypoint.sh`
+
+## Entrypoint modes
+
+```bash
+# API (default)
+gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+
+# Migraciones (job pre-deploy)
+RUN_MIGRATIONS=true → python manage.py migrate && exit
+
+# Worker
+CELERY_WORKER=true → celery -A config worker -l info
+```
+
+## CI/CD (GitHub Actions)
+1. **PR → main:** ruff + pytest (PostgreSQL service container)
+2. **Push main:** build image → push DO Container Registry → deploy App Platform
+
+## Secrets (nunca en repo)
+- `SECRET_KEY`, `DATABASE_URL`, `CELERY_BROKER_URL`
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- `BUNNY_STREAM_API_KEY`
+- Spaces: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+
+## Storage
+- Local: `MEDIA_ROOT` filesystem
+- Prod: `django-storages` + DO Spaces (`AWS_S3_ENDPOINT_URL`)
+
+## Checklist deploy
+- [ ] `DEBUG=False`, `ALLOWED_HOSTS` configurado
+- [ ] SSL automático App Platform
+- [ ] Webhook Stripe apunta a URL producción
+- [ ] Worker Celery desplegado como componente separado
+- [ ] Backups PostgreSQL habilitados

@@ -1,0 +1,52 @@
+---
+description: Convenciones DRF — URLs, respuestas, permisos, OpenAPI
+globs: apps/**/api/**/*.py,config/api_urls.py
+alwaysApply: false
+---
+
+# Convenciones API
+
+## Prefijos de URL (`/api/v1/`)
+
+| Prefijo | Permisos | Uso |
+|---------|----------|-----|
+| `/public/` | AllowAny | Catálogo, idiomas, datos públicos JSON |
+| `/auth/` | AllowAny / IsAuthenticated | Login, register, OAuth |
+| `/me/` | IsAuthenticatedUser | Compras, carrito, perfil |
+| `/admin/` | IsStaffUser | APIs administración (CRUD, stats) |
+| `/webhooks/stripe/` | Stripe signature | Eventos de pago |
+
+## Formato de respuesta
+
+```python
+# Recurso único → envelope
+{"data": {...}, "meta": {}}
+
+# Lista → paginación DRF estándar
+{"count": N, "next": "...", "previous": null, "results": [...]}
+
+# Error
+{"error": {"code": "CART_EMPTY", "message": "El carrito está vacío.", "details": {}}}
+```
+
+## Serializers
+- Separar por contexto: `public_serializers.py`, `admin_serializers.py`, `me_serializers.py`
+- List vs detail: override `get_serializer_class()` en viewsets
+- Documentar con `@extend_schema` (drf-spectacular)
+
+## Permisos
+- `IsStaffUser` — APIs admin
+- `IsAuthenticatedUser` — cliente logueado
+- `HasActiveAccess` — verifica Purchase/AccessGrant no expirado (content)
+
+## Alcance
+- Solo JSON REST; no devolver HTML de UI ni implementar vistas de frontend
+- Stripe Checkout devuelve `session_url`; el redirect lo hace el cliente externo
+
+## Paginación
+- `DefaultPageNumberPagination`: page_size=20, max=100
+- Query param: `?page=` y `?page_size=`
+
+## Idempotencia
+- Webhooks Stripe: verificar `event.id` no procesado antes
+- Checkout: usar `Idempotency-Key` header en creación de sesión

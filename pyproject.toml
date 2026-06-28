@@ -1,0 +1,57 @@
+[project]
+name = "recetario-backend"
+version = "0.1.0"
+description = "Recetario LMS + E-commerce — Django REST API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.0,<6",
+    "django-cors-headers>=4.3,<5",
+    "djangorestframework>=3.15,<4",
+    "djangorestframework-simplejwt>=5.3,<6",
+    "google-auth>=2.29,<3",
+    "requests>=2.31,<3",
+    "psycopg[binary]>=3.1,<4",
+    "python-dotenv>=1.0,<2",
+    "drf-spectacular>=0.27,<1",
+    "celery[redis]>=5.4,<6",
+    "redis>=5.0,<6",
+]
+
+[project.optional-dependencies]
+prod = [
+    "gunicorn>=22.0,<24",
+    "whitenoise>=6.6,<7",
+]
+dev = [
+    "pytest>=8.0,<9",
+    "pytest-django>=4.8,<5",
+    "ruff>=0.4,<1",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["apps*", "config*"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+pythonpath = ["."]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*" = ["E501", "I001"]
+
+[tool.ruff.format]
+quote-style = "double"

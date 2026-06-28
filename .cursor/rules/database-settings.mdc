@@ -1,0 +1,52 @@
+---
+description: Configuración BD — SQLite local, PostgreSQL producción
+globs: config/settings/**/*.py,config/settings/database.py
+alwaysApply: false
+---
+
+# Base de datos y settings
+
+## Regla principal
+- **Local (`config.settings.local`):** SQLite en `db.sqlite3` — NO requiere Docker
+- **Producción (`config.settings.production`):** PostgreSQL vía `DATABASE_URL`
+- **Tests CI:** PostgreSQL (paridad con prod)
+- **Tests local:** SQLite `:memory:` (rápido)
+
+## Settings split
+
+```
+config/settings/
+├── base.py        # Apps, DRF, JWT, Celery — compartido
+├── local.py       # DEBUG=True, SQLite default
+├── test.py        # Eager Celery, BD según CI
+└── production.py  # DEBUG=False, PostgreSQL, Spaces, security
+```
+
+## local.py — SQLite default
+
+```python
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+# Postgres opcional si DATABASE_URL está definida (override)
+```
+
+## production.py — PostgreSQL obligatorio
+
+```python
+# DATABASE_URL=postgres://user:pass@host:25060/recetario?sslmode=require
+DATABASES = {"default": parse_database_url(os.environ["DATABASE_URL"])}
+```
+
+## Convenciones ORM
+- Migraciones en cada PR que toque modelos
+- Índices en: `slug`, `user_id + product_id`, `expires_at`
+- `select_related` / `prefetch_related` en selectors, no en views
+- No usar features exclusivas de Postgres en queries si deben correr en SQLite local
+
+## Celery (local vs prod)
+- Local: Redis opcional via docker-compose; `CELERY_TASK_ALWAYS_EAGER=True` en tests
+- Prod: Managed Redis en DO con URL `rediss://`
