@@ -40,3 +40,4 @@ Plataforma **LMS + E-commerce** expuesta vía Django/DRF para venta de cursos y 
 - Usar PostgreSQL en local por defecto (SQLite es el default)
 - Exponer `video_id` de Bunny sin verificar Purchase activo
 - Implementar reproductor de video, landing page o paneles visuales
+- Entregar features sin actualizar `docs/PLAN-DESARROLLO.md` cuando corresponda (ver regla `plan-desarrollo-sync`)

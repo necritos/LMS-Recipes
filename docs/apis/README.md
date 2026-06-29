@@ -14,8 +14,8 @@ https://api.tudominio.com/api/v1/ # producción
 | Carpeta | Audiencia | Prefijo URL | Auth |
 |---------|-----------|-------------|------|
 | [auth/](./auth/) | Usuario final | `/api/v1/auth/` | JWT `type=user` |
+| [public/](./public/) | Visitantes | `/api/v1/public/` | Ninguna |
 | [admin/](./admin/) | Staff / administración | `/api/v1/admin/` | JWT `type=staff` |
-| public/ *(fase 2+)* | Visitantes | `/api/v1/public/` | Ninguna |
 
 ## Convenciones globales
 
@@ -53,3 +53,16 @@ https://api.tudominio.com/api/v1/ # producción
 |--------|------|-----------|
 | POST | `/admin/auth/login/` | [admin/auth/login.md](./admin/auth/login.md) |
 | POST | `/admin/auth/logout/` | [admin/auth/logout.md](./admin/auth/logout.md) |
+
+## Índice — Catálogo público (Fase 2)
+
+Ver [public/README.md](./public/README.md).
+
+## Índice — Admin Catálogo (Fase 2)
+
+Ver [admin/catalog/README.md](./admin/catalog/README.md).  
+Guía de idiomas: [admin/catalog/languages.md](./admin/catalog/languages.md).
+
+## Índice — Admin Usuarios
+
+Ver [admin/users/README.md](./admin/users/README.md).

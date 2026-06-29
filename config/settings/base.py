@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.common",
     "apps.accounts",
     "apps.notifications",
+    "apps.catalog",
 ]
 
 AUTH_USER_MODEL = "accounts.StaffUser"
@@ -114,6 +115,8 @@ SPECTACULAR_SETTINGS = {
         {"name": "Public", "description": "Endpoints públicos"},
         {"name": "Auth", "description": "Registro, login y recuperación de contraseña"},
         {"name": "Admin — Auth", "description": "Autenticación del panel administrativo"},
+        {"name": "Admin — Catalog", "description": "CRUD de cursos, recetas, categorías e idiomas"},
+        {"name": "Admin — Users", "description": "Listado y detalle de usuarios finales"},
     ],
     "COMPONENT_SPLIT_REQUEST": True,
 }

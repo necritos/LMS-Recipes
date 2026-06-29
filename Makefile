@@ -15,6 +15,9 @@ worker:
 migrate:
 	python manage.py migrate
 
+seed-languages:
+	python manage.py seed_languages
+
 test:
 	pytest
 

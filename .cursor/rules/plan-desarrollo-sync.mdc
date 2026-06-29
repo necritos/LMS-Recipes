@@ -1,0 +1,49 @@
+---
+description: Mantener docs/PLAN-DESARROLLO.md sincronizado con lo implementado
+alwaysApply: true
+---
+
+# Sincronizar plan de desarrollo
+
+Archivo canónico: `docs/PLAN-DESARROLLO.md`
+
+## Cuándo actualizarlo
+
+En **el mismo cambio** en que implementes o documentes funcionalidad, actualiza el plan si aplica cualquiera de estos casos:
+
+- Completas un ítem de checklist de alguna fase
+- Adelantas trabajo de una fase futura (marca `[x]` en la fase origen y anota *(implementado en Fase N)* en la fase planificada)
+- Añades endpoints, apps o modelos nuevos
+- Cambias criterios de aceptación o alcance de una fase
+- Cierras una fase (`**Fase completada:** ✅`)
+
+## Qué tocar en el plan
+
+1. **Checklist** de la fase — marcar `[x]` ítems terminados; añadir ítems nuevos si el alcance creció
+2. **Criterios de aceptación** — marcar los cumplidos
+3. **Tabla "Progreso general"** (sección 7) — estado ✅ / ⬜ / 🔄 en curso
+4. **Sección 6 (API)** — si cambian rutas o prefijos documentados
+5. **Notas de adelanto** — si algo se implementó antes de lo previsto, referenciar la fase original para no duplicar trabajo
+
+## Qué NO hacer
+
+- No marcar ítems sin implementación real (tests/docs incluidos si el ítem lo exige)
+- No borrar ítems pendientes de fases futuras; márcalos como hechos en otra fase o déjalos `[ ]` con nota
+- No editar el plan en un commit separado semanas después; va junto al código
+
+## Ejemplo
+
+Al añadir `GET /admin/users/` en Fase 2:
+
+```markdown
+# Fase 2
+- [x] API admin: GET /api/v1/admin/users/ — listado paginado *(adelantado desde Fase 6)*
+
+# Fase 6
+- [x] API GET /api/v1/admin/users/ — listado paginado *(implementado en Fase 2)*
+- [ ] API GET /api/v1/admin/users/{id}/ — detalle con historial de compras *(detalle básico en Fase 2)*
+```
+
+## Documentación API
+
+Si el plan menciona documentar APIs, actualiza también `docs/apis/` en el mismo cambio (índices en `docs/apis/README.md` y README de la sección correspondiente).

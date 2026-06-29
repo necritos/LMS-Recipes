@@ -240,7 +240,7 @@ Prefijo base: `/api/v1/`
 | `/api/v1/auth/` | Registro/login | login, register, Google OAuth, reset password |
 | `/api/v1/me/` | Usuario autenticado | Mis cursos, mis recetas, carrito, perfil |
 | `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe, confirmar pago |
-| `/api/v1/admin/` | Staff | CRUD cursos/recetas, usuarios, dashboard |
+| `/api/v1/admin/` | Staff | CRUD catálogo, listado usuarios, dashboard |
 | `/api/v1/webhooks/stripe/` | Stripe | Eventos de pago |
 
 ### Contrato de respuesta (heredado de BEDERR)
@@ -261,6 +261,8 @@ Prefijo base: `/api/v1/`
 ## 7. Plan de trabajo por fases (8 semanas)
 
 > Marca cada ítem con `[x]` al completarlo. Ejemplo: `- [x] Tarea terminada`
+>
+> **Mantenimiento:** al implementar features nuevas, adelantar ítems de fases futuras o cerrar una fase, **actualizar este archivo en el mismo PR/cambio** (checklist, criterios, tabla de progreso y sección 6 si cambian endpoints). Regla Cursor: `.cursor/rules/plan-desarrollo-sync.mdc`.
 
 ### Progreso general
 
@@ -268,7 +270,7 @@ Prefijo base: `/api/v1/`
 |------|--------|--------|
 | 0 — Fundación | 1 | ✅ Completada |
 | 1 — Autenticación | 2 | ✅ Completada |
-| 2 — Catálogo | 3 | ⬜ Pendiente |
+| 2 — Catálogo | 3 | ✅ Completada |
 | 3 — Contenido y video | 4 | ⬜ Pendiente |
 | 4 — E-commerce | 5 | ⬜ Pendiente |
 | 5 — APIs usuario | 6 | ⬜ Pendiente |
@@ -344,34 +346,44 @@ Prefijo base: `/api/v1/`
 
 ### Fase 2 — Catálogo multi-idioma (Semana 3)
 
-**Objetivo:** CRUD de cursos, recetas, categorías e idiomas.
+**Objetivo:** CRUD de cursos, recetas, categorías e idiomas; catálogo público multi-idioma; listado admin de usuarios.
 
 #### Checklist
 
-- [ ] Crear app `catalog`
-- [ ] Modelo `Language` (código, nombre, activo)
-- [ ] Modelo `Category` con soporte multi-idioma
-- [ ] Modelo `Course` (precio, slug, duración acceso 365 días, traducciones)
-- [ ] Modelo `Recipe` (precio, slug, acceso lifetime/365 días, traducciones)
-- [ ] Migraciones y datos seed de idiomas (ES, EN mínimo)
-- [ ] API pública: `GET /api/v1/public/courses/` con filtro `?lang=`
-- [ ] API pública: `GET /api/v1/public/recipes/` con filtro `?lang=`
-- [ ] API pública: detalle por slug (`/public/courses/{slug}/`)
-- [ ] API admin: CRUD completo de cursos
-- [ ] API admin: CRUD completo de recetas
-- [ ] API admin: gestión de categorías e idiomas
-- [ ] Upload de imágenes de portada (local en dev)
-- [ ] Configurar storage DO Spaces en `production.py`
-- [ ] Campos SEO: slug único, meta title, meta description
-- [ ] Tests de catálogo público y CRUD admin
+- [x] Crear app `catalog`
+- [x] Modelo `Language` (código, nombre, activo)
+- [x] Modelo `Category` con soporte multi-idioma
+- [x] Modelo `Course` (precio, slug, duración acceso 365 días, traducciones)
+- [x] Modelo `Recipe` (precio, slug, acceso lifetime/365 días, traducciones)
+- [x] Migraciones y datos seed de idiomas (ES, EN mínimo) — `seed_languages` / `make seed-languages`
+- [x] API pública: `GET /api/v1/public/languages/`
+- [x] API pública: `GET /api/v1/public/categories/?lang=`
+- [x] API pública: `GET /api/v1/public/courses/` con filtro `?lang=`
+- [x] API pública: `GET /api/v1/public/recipes/` con filtro `?lang=`
+- [x] API pública: detalle por slug (`/public/courses/{slug}/`, `/public/recipes/{slug}/`)
+- [x] API admin: CRUD completo de cursos
+- [x] API admin: CRUD completo de recetas
+- [x] API admin: CRUD categorías e idiomas (incl. activar/desactivar `is_active`)
+- [x] API admin: `GET /api/v1/admin/users/` — listado paginado con búsqueda *(adelantado desde Fase 6)*
+- [x] API admin: `GET /api/v1/admin/users/{id}/` — detalle básico *(compras: Fase 5)*
+- [x] Upload de imágenes de portada (local en dev)
+- [x] Configurar storage DO Spaces en `production.py`
+- [x] Campos SEO: slug único, meta title, meta description
+- [x] Tests de catálogo público, CRUD admin, categorías e idiomas
+- [x] Tests listado y detalle admin de usuarios
+- [x] Documentación API pública en `docs/apis/public/`
+- [x] Documentación admin por recurso: `languages.md`, `categories.md`, `courses.md`, `recipes.md`, `users/`
+- [x] Guía del sistema multi-idioma en `docs/apis/admin/catalog/languages.md`
 
 #### Criterio de aceptación
 
-- [ ] Admin crea curso en ES y EN
-- [ ] Catálogo público filtra correctamente por idioma
-- [ ] Imágenes de portada se suben y sirven correctamente
+- [x] Admin crea curso en ES y EN
+- [x] Admin gestiona categorías, idiomas y recetas vía API
+- [x] Catálogo público filtra correctamente por idioma
+- [x] Imágenes de portada se suben y sirven correctamente
+- [x] Staff puede listar usuarios registrados
 
-**Fase completada:** ⬜
+**Fase completada:** ✅
 
 ---
 
@@ -476,17 +488,17 @@ Prefijo base: `/api/v1/`
 - [ ] Métrica: ingresos totales y por período (día/semana/mes)
 - [ ] Métrica: ventas recientes (últimas N órdenes)
 - [ ] Métrica: productos más vendidos
-- [ ] API `GET /api/v1/admin/users/` — listado paginado
-- [ ] API `GET /api/v1/admin/users/{id}/` — detalle con historial de compras
-- [ ] API gestión idiomas: activar/desactivar (`/admin/languages/`)
+- [x] API `GET /api/v1/admin/users/` — listado paginado *(implementado en Fase 2)*
+- [ ] API `GET /api/v1/admin/users/{id}/` — detalle **con historial de compras** *(detalle básico ya en Fase 2; `purchases` pendiente Fase 5)*
+- [x] API gestión idiomas: activar/desactivar (`/admin/languages/`) *(implementado en Fase 2)*
 - [ ] Documentar config Stripe (keys solo en env; toggle test/live documentado)
 - [ ] Endpoint `GET /api/v1/admin/dashboard/revenue/` — serie temporal ingresos (JSON)
-- [ ] Tests de dashboard y endpoints admin
+- [ ] Tests de dashboard y endpoints admin analytics
 
 #### Criterio de aceptación
 
 - [ ] API dashboard devuelve ingresos reales calculados desde `Order`
-- [ ] Admin puede listar usuarios y ver sus compras
+- [ ] Admin puede ver historial de compras en detalle de usuario
 - [ ] Estadísticas coinciden con datos de `Order` en BD
 
 **Fase completada:** ⬜

@@ -43,6 +43,47 @@ def auth_client(api_client, registered_user):
 
 
 @pytest.fixture
+def languages(db):
+    from apps.catalog.models import Language
+
+    es, _ = Language.objects.get_or_create(code="es", defaults={"name": "Español"})
+    en, _ = Language.objects.get_or_create(code="en", defaults={"name": "English"})
+    return {"es": es, "en": en}
+
+
+@pytest.fixture
+def published_course(staff_client, languages):
+    response = staff_client.post(
+        "/api/v1/admin/courses/",
+        {
+            "slug": "curso-pasta",
+            "price": "49.99",
+            "access_days": 365,
+            "status": "published",
+            "translations": [
+                {
+                    "language_code": "es",
+                    "title": "Curso de Pasta",
+                    "description": "Aprende pasta italiana",
+                    "meta_title": "Pasta ES",
+                    "meta_description": "Meta pasta",
+                },
+                {
+                    "language_code": "en",
+                    "title": "Pasta Course",
+                    "description": "Learn Italian pasta",
+                    "meta_title": "Pasta EN",
+                    "meta_description": "Pasta meta",
+                },
+            ],
+        },
+        format="json",
+    )
+    assert response.status_code == 201
+    return response.json()["data"]
+
+
+@pytest.fixture
 def staff_client(api_client, staff_user):
     response = api_client.post(
         "/api/v1/admin/auth/login/",

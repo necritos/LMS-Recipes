@@ -2,6 +2,7 @@ import os
 
 from django.core.exceptions import ImproperlyConfigured
 
+from apps.common.storage_config import configure_media_storage
 from config.settings.base import *  # noqa: F403
 from config.settings.database import get_default_database
 
@@ -48,6 +49,8 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+configure_media_storage()
 
 _base_middleware = list(MIDDLEWARE)  # noqa: F405
 MIDDLEWARE = [
