@@ -1,13 +1,16 @@
-name: CI
+name: Deploy
 
 on:
-  pull_request:
-    branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
 
     services:
@@ -51,3 +54,25 @@ jobs:
 
       - name: Pytest
         run: pytest
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy to DigitalOcean Droplet
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            APP_DIR="${{ secrets.DEPLOY_PATH }}"
+            cd "$APP_DIR"
+            git fetch origin main
+            git reset --hard origin/main
+            chmod +x deploy/remote_deploy.sh
+            bash deploy/remote_deploy.sh

@@ -275,7 +275,7 @@ Prefijo base: `/api/v1/`
 | 4 — E-commerce | 5 | ⬜ Pendiente |
 | 5 — APIs usuario | 6 | ⬜ Pendiente |
 | 6 — Admin y analytics | 7 | ⬜ Pendiente |
-| 7 — Despliegue y QA | 8 | ⬜ Pendiente |
+| 7 — Despliegue y QA | 8 | 🔄 En curso (Droplet + CI/CD) |
 
 ---
 
@@ -513,21 +513,26 @@ Prefijo base: `/api/v1/`
 
 **Infraestructura**
 
-- [ ] Crear `Dockerfile` production-ready
+- [x] Desplegar Droplet Ubuntu 24.04 (Gunicorn + Nginx + Celery + Postgres + Redis locales)
+- [x] Dominio `petralicious.sk` con HTTPS (Let's Encrypt / certbot)
+- [x] CI/CD GitHub Actions: tests en PR/push + deploy SSH a Droplet (`deploy.yml`)
+- [x] Script `deploy/remote_deploy.sh` (pip, migrate, collectstatic, restart servicios)
+- [x] Documentar deploy en `docs/deploy-digitalocean.md`
+- [ ] Crear `Dockerfile` production-ready *(alternativa App Platform; Droplet activo)*
 - [ ] Crear `deploy/docker-entrypoint.sh` (API, worker, migrate job)
 - [ ] Crear `deploy/env.digitalocean.example`
-- [ ] Provisionar Managed PostgreSQL en Digital Ocean
-- [ ] Provisionar Managed Redis en Digital Ocean
+- [ ] Provisionar Managed PostgreSQL en Digital Ocean *(opcional; Postgres en Droplet)*
+- [ ] Provisionar Managed Redis en Digital Ocean *(opcional; Redis en Droplet)*
 - [ ] Provisionar DO Spaces para media
-- [ ] Desplegar App Platform: servicio web (Gunicorn)
+- [ ] Desplegar App Platform: servicio web (Gunicorn) *(alternativa; hoy Droplet)*
 - [ ] Desplegar App Platform: worker Celery (componente separado)
-- [ ] Configurar job de migraciones pre-deploy
-- [ ] Configurar dominio del cliente en App Platform
-- [ ] Verificar SSL/HTTPS activo (Let's Encrypt)
+- [x] Configurar job de migraciones en deploy (vía `remote_deploy.sh`)
+- [x] Configurar dominio del cliente (`petralicious.sk`)
+- [x] Verificar SSL/HTTPS activo (Let's Encrypt)
 
 **Integraciones producción**
 
-- [ ] Variables de entorno en App Platform (SECRET_KEY, DATABASE_URL, etc.)
+- [x] Variables de entorno en Droplet (`.env`: SECRET_KEY, DATABASE_URL, etc.)
 - [ ] Webhook Stripe apuntando a URL pública de producción
 - [ ] Stripe en modo live (o test según acuerdo con cliente)
 - [ ] Email transaccional producción (SendGrid/Resend)
@@ -540,15 +545,15 @@ Prefijo base: `/api/v1/`
 - [ ] Test integración API: admin crea curso y aparece en catálogo público
 - [ ] Test integración: email confirmación de compra enviado (Celery)
 - [ ] Verificar accesos expiran según reglas (curso 1 año / receta lifetime)
-- [ ] Publicar OpenAPI en `/api/schema/` y `/api/docs/` (Swagger/Redoc)
+- [x] Publicar OpenAPI en `/api/schema/` y `/api/docs/` (Swagger/Redoc)
 - [ ] Documento QA API / checklist pre-lanzamiento (sección 11) completado
 - [ ] Entrega código fuente backend al cliente
 
 #### Criterio de aceptación
 
-- [ ] API accesible en dominio/staging vía HTTPS
+- [x] API accesible en dominio vía HTTPS (`https://petralicious.sk`)
 - [ ] Flujo compra vía API + Stripe sandbox funciona end-to-end
-- [ ] Celery worker procesa emails y jobs en producción
+- [x] Celery worker desplegado y reiniciable vía CI/CD
 
 **Fase completada:** ⬜
 
