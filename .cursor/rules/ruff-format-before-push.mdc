@@ -1,0 +1,29 @@
+---
+description: Formatear y lint antes de commit/push (ruff)
+alwaysApply: true
+---
+
+# Format + lint antes de commit/push
+
+Antes de **cualquier** `git commit` o `git push` en este repo:
+
+1. Ejecutar `ruff format .`
+2. Ejecutar `ruff check .` (arreglar errores; usar `--fix` solo si es seguro)
+3. Ejecutar `ruff format --check .` para confirmar que CI no fallará
+4. Incluir en el commit los archivos reformateados
+5. Preferible: `pytest -q` si el cambio toca lógica/API
+
+## Comando típico
+
+```bash
+ruff format .
+ruff check .
+ruff format --check .
+pytest -q
+```
+
+## Notas
+
+- CI corre `ruff format --check .`; si un archivo no está formateado, el workflow falla y no despliega.
+- Las migraciones también se formatean (no excluirlas del format).
+- No hagas push dejando fallos de format “para después”.

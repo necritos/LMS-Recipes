@@ -41,3 +41,4 @@ Plataforma **LMS + E-commerce** expuesta vía Django/DRF para venta de cursos y 
 - Exponer `video_id` de Bunny sin verificar Purchase activo
 - Implementar reproductor de video, landing page o paneles visuales
 - Entregar features sin actualizar `docs/PLAN-DESARROLLO.md` cuando corresponda (ver regla `plan-desarrollo-sync`)
+- Hacer commit/push sin pasar `ruff format` + `ruff check` (ver regla `ruff-format-before-push`)

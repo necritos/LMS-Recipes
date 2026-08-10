@@ -91,9 +91,10 @@ def update_recipe(*, recipe: Recipe, **fields) -> Recipe:
     elif "access_days" not in fields:
         fields["access_days"] = access_days
 
-    if "slug" in fields and Recipe.objects.exclude(pk=recipe.pk).filter(
-        slug=fields["slug"]
-    ).exists():
+    if (
+        "slug" in fields
+        and Recipe.objects.exclude(pk=recipe.pk).filter(slug=fields["slug"]).exists()
+    ):
         raise BusinessError(
             "SLUG_ALREADY_EXISTS",
             "Ya existe una receta con este slug.",

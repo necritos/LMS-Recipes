@@ -55,9 +55,10 @@ def create_category(
 @transaction.atomic
 def update_category(*, category: Category, **fields) -> Category:
     translations = fields.pop("translations", None)
-    if "slug" in fields and Category.objects.exclude(pk=category.pk).filter(
-        slug=fields["slug"]
-    ).exists():
+    if (
+        "slug" in fields
+        and Category.objects.exclude(pk=category.pk).filter(slug=fields["slug"]).exists()
+    ):
         raise BusinessError(
             "SLUG_ALREADY_EXISTS",
             "Ya existe una categoría con este slug.",

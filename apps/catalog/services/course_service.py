@@ -68,9 +68,10 @@ def update_course(*, course: Course, **fields) -> Course:
     translations = fields.pop("translations", None)
     cover_image = fields.pop("cover_image", None)
 
-    if "slug" in fields and Course.objects.exclude(pk=course.pk).filter(
-        slug=fields["slug"]
-    ).exists():
+    if (
+        "slug" in fields
+        and Course.objects.exclude(pk=course.pk).filter(slug=fields["slug"]).exists()
+    ):
         raise BusinessError(
             "SLUG_ALREADY_EXISTS",
             "Ya existe un curso con este slug.",
