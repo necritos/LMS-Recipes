@@ -71,6 +71,8 @@ jobs:
           script: |
             set -euo pipefail
             APP_DIR="${{ secrets.DEPLOY_PATH }}"
+            # Repo owned by app user; root needs safe.directory for git.
+            git config --global --add safe.directory "$APP_DIR"
             cd "$APP_DIR"
             git fetch origin main
             git reset --hard origin/main

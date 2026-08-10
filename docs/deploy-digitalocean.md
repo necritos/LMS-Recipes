@@ -4,14 +4,16 @@ Guía para CI/CD: tests en GitHub Actions + deploy por SSH al Droplet.
 
 ## Flujo
 
-1. **Push / PR a `main`** → workflow `CI` (ruff + pytest).
+1. **Pull request a `main`** → workflow `CI` (ruff + pytest).
 2. **Push a `main`** → workflow `Deploy`:
-   - vuelve a pasar tests
+   - pasa tests
    - SSH al Droplet
    - `git fetch` + `reset --hard origin/main`
    - `pip install`, `migrate`, `collectstatic`
    - reinicia `recetario-api` y `recetario-worker`
    - health check local
+
+> En push a `main` solo corre **Deploy** (no se duplica con CI).
 
 ## Secrets de GitHub
 
