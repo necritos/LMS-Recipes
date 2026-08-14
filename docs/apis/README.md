@@ -75,3 +75,13 @@ Ver [admin/site/README.md](./admin/site/README.md) y [public/site.md](./public/s
 ## Índice — Contenido y video (Fase 3)
 
 Ver [admin/content.md](./admin/content.md), [admin/site/bunny.md](./admin/site/bunny.md) y [me/content.md](./me/content.md).
+
+## Índice — E-commerce y Stripe (Fase 4)
+
+| Método | Ruta | Documento |
+|--------|------|-----------|
+| GET/PATCH | `/admin/site/stripe/` | [admin/site/stripe.md](./admin/site/stripe.md) — Dashboard + admin |
+| GET/POST/DELETE | `/me/cart/` | [me/cart.md](./me/cart.md) |
+| DELETE | `/me/cart/items/{id}/` | [me/cart.md](./me/cart.md) |
+| POST | `/checkout/create-session/` | [checkout.md](./checkout.md) |
+| POST | `/webhooks/stripe/` | [webhooks/stripe.md](./webhooks/stripe.md) |

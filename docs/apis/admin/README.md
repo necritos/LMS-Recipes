@@ -23,7 +23,7 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 
 | Documento | Descripción |
 |-----------|-------------|
-| [site/README.md](./site/README.md) | Índice CMS, Firebase, Bunny, contacto, newsletter |
+| [site/README.md](./site/README.md) | Índice CMS, Firebase, Bunny, Stripe, contacto, newsletter |
 
 ## Contenido y video
 
@@ -31,6 +31,12 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 |-----------|-------------|
 | [content.md](./content.md) | Módulos, lecciones y `bunny_video_id` |
 | [site/bunny.md](./site/bunny.md) | Credenciales Bunny.net (admin, no env) |
+
+## Pagos (Stripe)
+
+| Documento | Descripción |
+|-----------|-------------|
+| [site/stripe.md](./site/stripe.md) | Keys, webhook, Apple Pay / Google Pay (admin, no env) |
 
 ## Usuarios
 
@@ -40,4 +46,4 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 
 ## Próximas fases
 
-- Fase 6: Dashboard en `/admin/dashboard/`, historial de compras en detalle de usuario
+- Fase 6: Dashboard en `/admin/dashboard/`

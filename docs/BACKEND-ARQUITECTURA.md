@@ -76,9 +76,11 @@ Google OAuth: flujo authorization code → crear/vincular `UserAccount`.
 ## 4. Integraciones externas
 
 ### Stripe
-- Checkout Session para pagos one-time
-- Webhook: `checkout.session.completed`, `payment_intent.payment_failed`
-- Metadata en session: `user_id`, `cart_item_ids`
+- Credenciales (secret key, webhook secret, publishable key, URLs, moneda) se configuran en admin: `GET/PATCH /api/v1/admin/site/stripe/` — nunca en `.env`
+- Checkout Session one-time (`mode=payment`). Apple Pay / Google Pay se activan en el Dashboard; el backend no fuerza `payment_method_types`
+- Webhook: `checkout.session.completed`, `payment_intent.payment_failed`, `checkout.session.expired`
+- Metadata en session: `user_id`, `order_id`
+- Guía: [`docs/apis/admin/site/stripe.md`](./apis/admin/site/stripe.md)
 
 ### Bunny.net Stream
 - Credenciales (library ID, API key, token key, CDN hostname, TTL) se configuran en admin: `GET/PATCH /api/v1/admin/site/bunny/` — nunca en `.env`

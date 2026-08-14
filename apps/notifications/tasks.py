@@ -40,6 +40,17 @@ def send_email_task(
         raise self.retry(exc=exc) from exc
 
 
+@shared_task(name="notifications.send_purchase_confirmation")
+def send_purchase_confirmation_task(order_id: str) -> None:
+    from apps.commerce.models import Order
+    from apps.commerce.services.webhook_service import _send_purchase_email
+
+    order = Order.objects.filter(pk=order_id).first()
+    if order is None:
+        return
+    _send_purchase_email(order)
+
+
 @shared_task(name="notifications.send_welcome_email")
 def send_welcome_email_task(user_account_id: str) -> dict:
     from django.conf import settings

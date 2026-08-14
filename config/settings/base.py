@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "apps.catalog",
     "apps.site",
     "apps.content",
+    "apps.commerce",
 ]
 
 AUTH_USER_MODEL = "accounts.StaffUser"
@@ -131,10 +132,12 @@ SPECTACULAR_SETTINGS = {
         {"name": "Public — Site", "description": "Home, contacto y newsletter"},
         {
             "name": "Admin — Site",
-            "description": "CMS del sitio, Firebase Storage, Bunny.net, inbox y newsletter",
+            "description": "CMS del sitio, Firebase, Bunny.net, Stripe, inbox y newsletter",
         },
         {"name": "Admin — Content", "description": "Módulos, lecciones y video Bunny"},
-        {"name": "Me", "description": "Contenido del usuario autenticado"},
+        {"name": "Me", "description": "Carrito y contenido del usuario autenticado"},
+        {"name": "Checkout", "description": "Sesión Stripe Checkout"},
+        {"name": "Webhooks", "description": "Webhooks de Stripe"},
     ],
     "COMPONENT_SPLIT_REQUEST": True,
 }

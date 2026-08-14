@@ -12,7 +12,7 @@ Listado y detalle de **usuarios finales** (`UserAccount`). No incluye staff (`St
 | GET | `/users/` | Listado paginado |
 | GET | `/users/{id}/` | Detalle de usuario |
 
-> El historial de compras (`purchases`) se implementará en Fase 5 (commerce). Por ahora el detalle devuelve `purchases: []`.
+El detalle incluye `purchases` (últimas 50) cuando hay órdenes pagadas vía Stripe. El listado del usuario (`GET /me/purchases/`) es Fase 5.
 
 ## Listar usuarios
 
@@ -78,7 +78,15 @@ Authorization: Bearer <access_staff>
     "last_login": null,
     "created_at": "2026-05-15T12:00:00Z",
     "updated_at": "2026-05-15T12:00:00Z",
-    "purchases": []
+    "purchases": [
+      {
+        "id": "uuid",
+        "order_id": "uuid",
+        "product_type": "course",
+        "product_id": "uuid",
+        "created_at": "2026-08-14T10:00:00Z"
+      }
+    ]
   },
   "meta": {}
 }

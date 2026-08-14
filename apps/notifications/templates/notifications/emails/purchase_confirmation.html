@@ -1,0 +1,10 @@
+<p>Hola {{ user_name }},</p>
+<p>Gracias por tu compra en <strong>{{ site_name }}</strong>.</p>
+<p>Pedido: <code>{{ order_id }}</code><br>Total: {{ total }} {{ currency }}</p>
+<ul>
+{% for item in items %}
+<li>{{ item.title }} — {{ item.price }} {{ currency }}</li>
+{% endfor %}
+</ul>
+<p>Ya puedes acceder a tu contenido desde tu cuenta.</p>
+<p>Saludos,<br>El equipo de {{ site_name }}</p>

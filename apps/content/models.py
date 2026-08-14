@@ -74,7 +74,7 @@ class LessonTranslation(UUIDModel, TimeStampedModel):
 
 
 class AccessGrant(UUIDModel, TimeStampedModel):
-    """Acceso de un usuario a un curso o receta. Fase 4 (Stripe) creará filas aquí."""
+    """Acceso de un usuario a un curso o receta (webhook Stripe o alta manual)."""
 
     class Source(models.TextChoices):
         MANUAL = "manual", "Manual"

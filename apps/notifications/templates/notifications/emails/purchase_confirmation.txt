@@ -1,0 +1,15 @@
+Hola {{ user_name }},
+
+Gracias por tu compra en {{ site_name }}.
+
+Pedido: {{ order_id }}
+Total: {{ total }} {{ currency }}
+
+{% for item in items %}
+- {{ item.title }} — {{ item.price }} {{ currency }}
+{% endfor %}
+
+Ya puedes acceder a tu contenido desde tu cuenta.
+
+Saludos,
+El equipo de {{ site_name }}

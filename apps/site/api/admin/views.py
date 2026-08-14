@@ -13,6 +13,7 @@ from apps.site.api.serializers import (
     AdminSiteSettingsSerializer,
     AdminSliderSerializer,
     AdminStartButtonSerializer,
+    AdminStripeSettingsSerializer,
     AdminTestimonialSerializer,
 )
 from apps.site.models import (
@@ -39,7 +40,11 @@ from apps.site.services.content_service import (
     update_testimonial,
 )
 from apps.site.services.inbox_service import set_contact_read
-from apps.site.services.settings_service import update_bunny_settings, update_site_settings
+from apps.site.services.settings_service import (
+    update_bunny_settings,
+    update_site_settings,
+    update_stripe_settings,
+)
 
 
 class AdminSiteSettingsView(APIView):
@@ -75,6 +80,24 @@ class AdminBunnySettingsView(APIView):
         serializer.is_valid(raise_exception=True)
         settings = update_bunny_settings(fields=serializer.validated_data)
         output = AdminBunnySettingsSerializer(settings)
+        return Response({"data": output.data, "meta": {}})
+
+
+class AdminStripeSettingsView(APIView):
+    permission_classes = [IsStaffUser]
+
+    @extend_schema(tags=["Admin — Site"])
+    def get(self, request):
+        settings = get_site_settings()
+        serializer = AdminStripeSettingsSerializer(settings)
+        return Response({"data": serializer.data, "meta": {}})
+
+    @extend_schema(tags=["Admin — Site"], request=AdminStripeSettingsSerializer)
+    def patch(self, request):
+        serializer = AdminStripeSettingsSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        settings = update_stripe_settings(fields=serializer.validated_data)
+        output = AdminStripeSettingsSerializer(settings)
         return Response({"data": output.data, "meta": {}})
 
 

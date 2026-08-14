@@ -40,6 +40,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         "singleton_key",
         "firebase_enabled",
         "bunny_enabled",
+        "stripe_enabled",
         "contact_email",
         "updated_at",
     )
@@ -48,6 +49,8 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         "firebase_credentials_json",
         "bunny_api_key",
         "bunny_token_key",
+        "stripe_secret_key",
+        "stripe_webhook_secret",
     )
 
 

@@ -34,6 +34,15 @@ class SiteSettings(UUIDModel, TimeStampedModel):
     bunny_token_key = models.TextField(blank=True)
     bunny_token_ttl_seconds = models.PositiveIntegerField(default=3600)
 
+    stripe_enabled = models.BooleanField(default=False)
+    stripe_mode = models.CharField(max_length=10, default="test")
+    stripe_publishable_key = models.CharField(max_length=255, blank=True)
+    stripe_secret_key = models.TextField(blank=True)
+    stripe_webhook_secret = models.TextField(blank=True)
+    stripe_success_url = models.CharField(max_length=500, blank=True)
+    stripe_cancel_url = models.CharField(max_length=500, blank=True)
+    stripe_currency = models.CharField(max_length=3, default="eur")
+
     class Meta:
         verbose_name = "site settings"
         verbose_name_plural = "site settings"

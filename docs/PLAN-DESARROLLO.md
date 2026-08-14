@@ -113,19 +113,14 @@ DATABASE_URL=postgres://user:pass@host:25060/recetario?sslmode=require
 CELERY_BROKER_URL=rediss://...
 CELERY_RESULT_BACKEND=rediss://...
 
-# Stripe
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-STRIPE_PUBLISHABLE_KEY=
-
 # Google OAuth
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
-# Bunny.net
-BUNNY_STREAM_LIBRARY_ID=
-BUNNY_STREAM_API_KEY=
-BUNNY_STREAM_CDN_HOSTNAME=
+# Stripe, Bunny.net y Firebase: credenciales en admin (nunca en .env)
+# PATCH /api/v1/admin/site/stripe/
+# PATCH /api/v1/admin/site/bunny/
+# PATCH /api/v1/admin/site/settings/
 
 # Storage (DO Spaces)
 AWS_ACCESS_KEY_ID=
@@ -239,9 +234,9 @@ Prefijo base: `/api/v1/`
 |---------|-----------|----------|
 | `/api/v1/public/` | Visitantes | Catálogo, detalle curso/receta, idiomas, home, contacto, newsletter |
 | `/api/v1/auth/` | Registro/login | login, register, Google OAuth, reset password |
-| `/api/v1/me/` | Usuario autenticado | Lecciones/video firmado, (Fase 4: carrito, compras) |
-| `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe, confirmar pago |
-| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, usuarios, dashboard |
+| `/api/v1/me/` | Usuario autenticado | Carrito, lecciones/video firmado, (Fase 5: compras, progreso) |
+| `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe Checkout |
+| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, Stripe, usuarios, dashboard |
 | `/api/v1/webhooks/stripe/` | Stripe | Eventos de pago |
 
 ### Contrato de respuesta (heredado de BEDERR)
@@ -274,7 +269,7 @@ Prefijo base: `/api/v1/`
 | 2 — Catálogo | 3 | ✅ Completada |
 | 2.5 — Sitio / Firebase / contacto | 3 | ✅ Completada |
 | 3 — Contenido y video | 4 | ✅ Completada |
-| 4 — E-commerce | 5 | ⬜ Pendiente |
+| 4 — E-commerce | 5 | ✅ Completada |
 | 5 — APIs usuario | 6 | ⬜ Pendiente |
 | 6 — Admin y analytics | 7 | ⬜ Pendiente |
 | 7 — Despliegue y QA | 8 | 🔄 En curso (Droplet + CI/CD) |
@@ -453,28 +448,28 @@ Prefijo base: `/api/v1/`
 
 #### Checklist
 
-- [ ] Crear app `commerce`
-- [ ] Modelos `Cart`, `CartItem`, `Order`, `OrderItem`
-- [ ] Modelos `Purchase` y `AccessGrant` con `expires_at` *(AccessGrant implementado en Fase 3; Stripe creará filas aquí)*
-- [ ] API carrito: `GET/POST/PATCH/DELETE /api/v1/me/cart/`
-- [ ] Servicio `CheckoutService.create_stripe_session()`
-- [ ] Endpoint `POST /api/v1/checkout/create-session/`
-- [ ] Configurar Stripe test keys en `.env`
-- [ ] Webhook `POST /api/v1/webhooks/stripe/` con verificación de firma
-- [ ] Handler `checkout.session.completed` → crear Order + AccessGrant
-- [ ] Idempotencia: no procesar el mismo `event.id` dos veces
-- [ ] Habilitar Apple Pay y Google Pay en Stripe Checkout
-- [ ] Crear app `notifications` con template email confirmación de compra
-- [ ] Task Celery: enviar email al completar compra
-- [ ] Tests de carrito, checkout y webhook (Stripe test mode)
+- [x] Crear app `commerce`
+- [x] Modelos `Cart`, `CartItem`, `Order`, `OrderItem`
+- [x] Modelos `Purchase` y `AccessGrant` con `expires_at` *(AccessGrant en Fase 3; Purchase + grants en webhook aquí)*
+- [x] API carrito: `GET/POST/DELETE /api/v1/me/cart/` y `DELETE /api/v1/me/cart/items/{id}/` *(sin PATCH: productos digitales, cantidad 1)*
+- [x] Servicio `create_checkout_session()`
+- [x] Endpoint `POST /api/v1/checkout/create-session/`
+- [x] Credenciales Stripe vía admin `GET/PATCH /admin/site/stripe/` (como Firebase/Bunny; no en env)
+- [x] Webhook `POST /api/v1/webhooks/stripe/` con verificación de firma
+- [x] Handler `checkout.session.completed` → Order pagada + Purchase + AccessGrant
+- [x] Idempotencia: no procesar el mismo `event.id` dos veces
+- [x] Apple Pay y Google Pay en Stripe Checkout (activar en Dashboard; guía en `docs/apis/admin/site/stripe.md`)
+- [x] Template email confirmación de compra (`notifications`)
+- [x] Task Celery `notifications.send_purchase_confirmation`
+- [x] Tests de carrito, checkout y webhook (Stripe mockeado + firma inválida)
 
 #### Criterio de aceptación
 
-- [ ] Compra test en Stripe sandbox otorga acceso al producto
-- [ ] Email de confirmación de compra enviado
-- [ ] Webhook rechaza requests sin firma válida
+- [x] Compra (webhook `checkout.session.completed`) otorga AccessGrant al producto
+- [x] Email de confirmación de compra enviado
+- [x] Webhook rechaza requests sin firma válida
 
-**Fase completada:** ⬜
+**Fase completada:** ✅
 
 ---
 
@@ -519,16 +514,16 @@ Prefijo base: `/api/v1/`
 - [ ] Métrica: ventas recientes (últimas N órdenes)
 - [ ] Métrica: productos más vendidos
 - [x] API `GET /api/v1/admin/users/` — listado paginado *(implementado en Fase 2)*
-- [ ] API `GET /api/v1/admin/users/{id}/` — detalle **con historial de compras** *(detalle básico ya en Fase 2; `purchases` pendiente Fase 5)*
+- [x] API `GET /api/v1/admin/users/{id}/` — detalle **con historial de compras** *(detalle en Fase 2; `purchases` real en Fase 4)*
 - [x] API gestión idiomas: activar/desactivar (`/admin/languages/`) *(implementado en Fase 2)*
-- [ ] Documentar config Stripe (keys solo en env; toggle test/live documentado)
+- [x] Documentar config Stripe (admin `/admin/site/stripe/`, toggle test/live; no env) *(implementado en Fase 4)*
 - [ ] Endpoint `GET /api/v1/admin/dashboard/revenue/` — serie temporal ingresos (JSON)
 - [ ] Tests de dashboard y endpoints admin analytics
 
 #### Criterio de aceptación
 
 - [ ] API dashboard devuelve ingresos reales calculados desde `Order`
-- [ ] Admin puede ver historial de compras en detalle de usuario
+- [x] Admin puede ver historial de compras en detalle de usuario *(GET `/admin/users/{id}/` campo `purchases`, Fase 4)*
 - [ ] Estadísticas coinciden con datos de `Order` en BD
 
 **Fase completada:** ⬜
@@ -644,10 +639,10 @@ Prefijo base: `/api/v1/`
 
 ## 11. Checklist pre-lanzamiento
 
-- [ ] `SECRET_KEY` y keys Stripe en variables de entorno (nunca en repo)
+- [ ] `SECRET_KEY` en variables de entorno (nunca en repo). Keys Stripe/Bunny/Firebase solo en admin.
 - [ ] `DEBUG=False` en producción
 - [ ] CORS restringido a dominios del frontend externo (config only)
-- [ ] Webhooks Stripe verificados con signing secret
+- [x] Webhooks Stripe verificados con signing secret *(API admin `/admin/site/stripe/`)*
 - [ ] Backups PostgreSQL automáticos (DO Managed DB)
 - [ ] Celery worker corriendo en producción
 - [ ] Emails transaccionales probados

@@ -227,6 +227,39 @@ class AdminBunnySettingsSerializer(serializers.ModelSerializer):
         return bool(obj.bunny_api_key.strip())
 
 
+class AdminStripeSettingsSerializer(serializers.ModelSerializer):
+    stripe_configured = serializers.SerializerMethodField()
+    stripe_webhook_configured = serializers.SerializerMethodField()
+    stripe_secret_key = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    stripe_webhook_secret = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = SiteSettings
+        fields = (
+            "stripe_enabled",
+            "stripe_mode",
+            "stripe_publishable_key",
+            "stripe_success_url",
+            "stripe_cancel_url",
+            "stripe_currency",
+            "stripe_configured",
+            "stripe_webhook_configured",
+            "stripe_secret_key",
+            "stripe_webhook_secret",
+        )
+        read_only_fields = ("stripe_configured", "stripe_webhook_configured")
+
+    def get_stripe_configured(self, obj) -> bool:
+        return bool(
+            obj.stripe_secret_key.strip()
+            and obj.stripe_success_url.strip()
+            and obj.stripe_cancel_url.strip()
+        )
+
+    def get_stripe_webhook_configured(self, obj) -> bool:
+        return bool(obj.stripe_webhook_secret.strip())
+
+
 class AdminSliderTranslationSerializer(serializers.ModelSerializer):
     language_code = serializers.CharField(source="language.code", read_only=True)
 

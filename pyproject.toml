@@ -19,6 +19,7 @@ dependencies = [
     "pillow>=10.0,<12",
     "django-storages[s3]>=1.14,<2",
     "firebase-admin>=6.5,<7",
+    "stripe>=11,<13",
 ]
 
 [project.optional-dependencies]

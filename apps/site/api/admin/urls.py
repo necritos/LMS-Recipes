@@ -8,6 +8,7 @@ from apps.site.api.admin.views import (
     AdminSiteSettingsView,
     AdminSliderViewSet,
     AdminStartButtonViewSet,
+    AdminStripeSettingsView,
     AdminTestimonialViewSet,
 )
 
@@ -21,5 +22,6 @@ router.register("newsletter", AdminNewsletterViewSet, basename="admin-newsletter
 urlpatterns = [
     path("site/settings/", AdminSiteSettingsView.as_view(), name="admin-site-settings"),
     path("site/bunny/", AdminBunnySettingsView.as_view(), name="admin-site-bunny"),
+    path("site/stripe/", AdminStripeSettingsView.as_view(), name="admin-site-stripe"),
     path("", include(router.urls)),
 ]

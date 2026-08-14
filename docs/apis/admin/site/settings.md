@@ -5,7 +5,8 @@ Auth: JWT staff.
 
 Configura textos de home, redes, teléfonos y **dónde se guardan las imágenes**.
 
-Video (Bunny.net): [bunny.md](./bunny.md) — `GET/PATCH /site/bunny/`.
+Video (Bunny.net): [bunny.md](./bunny.md) — `GET/PATCH /site/bunny/`.  
+Pagos (Stripe): [stripe.md](./stripe.md) — `GET/PATCH /site/stripe/`.
 
 ## Prioridad de storage
 

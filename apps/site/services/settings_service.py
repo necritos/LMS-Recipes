@@ -107,3 +107,60 @@ def update_bunny_settings(*, fields: dict) -> SiteSettings:
 def _normalize_bunny_hostname(value: str) -> str:
     raw = value.strip().removeprefix("https://").removeprefix("http://")
     return raw.split("/")[0].strip()
+
+
+@transaction.atomic
+def update_stripe_settings(*, fields: dict) -> SiteSettings:
+    settings = get_site_settings()
+    for secret in ("stripe_secret_key", "stripe_webhook_secret"):
+        if fields.get(secret) == "":
+            fields[secret] = getattr(settings, secret)
+
+    enabled = fields.get("stripe_enabled", settings.stripe_enabled)
+    mode = (fields.get("stripe_mode", settings.stripe_mode) or "test").strip().lower()
+    if mode not in {"test", "live"}:
+        raise BusinessError(
+            "STRIPE_MODE_INVALID",
+            "stripe_mode debe ser 'test' o 'live'.",
+            http_status=422,
+        )
+    fields["stripe_mode"] = mode
+
+    secret_key = (
+        fields["stripe_secret_key"] if "stripe_secret_key" in fields else settings.stripe_secret_key
+    )
+    success_url = fields.get("stripe_success_url", settings.stripe_success_url)
+    cancel_url = fields.get("stripe_cancel_url", settings.stripe_cancel_url)
+    currency = (fields.get("stripe_currency", settings.stripe_currency) or "eur").strip().lower()
+    if len(currency) != 3 or not currency.isalpha():
+        raise BusinessError(
+            "STRIPE_CURRENCY_INVALID",
+            "La moneda debe ser un código ISO de 3 letras (ej. eur, usd).",
+            http_status=422,
+        )
+    fields["stripe_currency"] = currency
+
+    if enabled:
+        missing = not all((value or "").strip() for value in (secret_key, success_url, cancel_url))
+        if missing:
+            raise BusinessError(
+                "STRIPE_CONFIG_INCOMPLETE",
+                "Para activar Stripe necesitas secret_key, success_url y cancel_url.",
+                http_status=422,
+            )
+        prefix = "sk_test_" if mode == "test" else "sk_live_"
+        if not secret_key.strip().startswith(prefix):
+            raise BusinessError(
+                "STRIPE_KEY_MODE_MISMATCH",
+                f"En modo {mode} la secret_key debe empezar por {prefix}.",
+                http_status=422,
+            )
+
+    for key in ("stripe_success_url", "stripe_cancel_url"):
+        if key in fields and fields[key]:
+            fields[key] = fields[key].strip()
+
+    for key, value in fields.items():
+        setattr(settings, key, value)
+    settings.save()
+    return settings

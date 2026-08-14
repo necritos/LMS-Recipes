@@ -1,6 +1,6 @@
 # Me — Contenido con acceso
 
-JWT `type=user`. Requiere un `AccessGrant` activo (lo creará Stripe en Fase 4; mientras tanto se puede crear en Django admin / tests).
+JWT `type=user`. Requiere un `AccessGrant` activo (lo crea el webhook de Stripe al pagar; también se puede crear en Django admin / tests).
 
 Query `?lang=es` (default `es`) para títulos de módulos y lecciones.
 

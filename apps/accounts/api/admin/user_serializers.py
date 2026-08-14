@@ -41,5 +41,16 @@ class AdminUserAccountDetailSerializer(AdminUserAccountSerializer):
         fields = AdminUserAccountSerializer.Meta.fields + ("purchases",)
 
     def get_purchases(self, obj) -> list:
-        # Historial de compras — Fase 5 (commerce)
-        return []
+        rows = obj.purchases.select_related("order", "course", "recipe")[:50]
+        result = []
+        for purchase in rows:
+            result.append(
+                {
+                    "id": str(purchase.id),
+                    "order_id": str(purchase.order_id),
+                    "product_type": "course" if purchase.course_id else "recipe",
+                    "product_id": str(purchase.course_id or purchase.recipe_id),
+                    "created_at": purchase.created_at,
+                }
+            )
+        return result
