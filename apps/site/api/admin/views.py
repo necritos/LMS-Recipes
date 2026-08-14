@@ -71,7 +71,7 @@ class AdminSliderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsStaffUser]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     serializer_class = AdminSliderSerializer
-    queryset = HomeSlider.objects.all()
+    queryset = HomeSlider.objects.prefetch_related("translations__language").all()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -105,7 +105,7 @@ class AdminStartButtonViewSet(viewsets.ModelViewSet):
     permission_classes = [IsStaffUser]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     serializer_class = AdminStartButtonSerializer
-    queryset = StartButton.objects.all()
+    queryset = StartButton.objects.prefetch_related("translations__language").all()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -138,7 +138,7 @@ class AdminStartButtonViewSet(viewsets.ModelViewSet):
 class AdminTestimonialViewSet(viewsets.ModelViewSet):
     permission_classes = [IsStaffUser]
     serializer_class = AdminTestimonialSerializer
-    queryset = Testimonial.objects.all()
+    queryset = Testimonial.objects.prefetch_related("translations__language").all()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

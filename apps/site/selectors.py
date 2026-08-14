@@ -1,12 +1,17 @@
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 
+from apps.catalog.models import Language
 from apps.site.models import (
     ContactMessage,
     HomeSlider,
+    HomeSliderTranslation,
     NewsletterSubscriber,
     SiteSettings,
+    SiteSettingsTranslation,
     StartButton,
+    StartButtonTranslation,
     Testimonial,
+    TestimonialTranslation,
 )
 
 
@@ -15,28 +20,50 @@ def get_site_settings() -> SiteSettings:
     return settings
 
 
-def public_sliders() -> QuerySet[HomeSlider]:
-    return HomeSlider.objects.filter(is_active=True).order_by("sort_order", "created_at")
+def _prefetch_lang(qs, translation_model, language: Language):
+    return (
+        qs.filter(translations__language=language)
+        .distinct()
+        .prefetch_related(
+            Prefetch(
+                "translations",
+                queryset=translation_model.objects.filter(language=language),
+                to_attr="active_translations",
+            )
+        )
+    )
 
 
-def public_start_buttons() -> QuerySet[StartButton]:
-    return StartButton.objects.filter(is_active=True).order_by("sort_order", "created_at")
+def public_sliders(*, language: Language) -> QuerySet[HomeSlider]:
+    return _prefetch_lang(
+        HomeSlider.objects.filter(is_active=True),
+        HomeSliderTranslation,
+        language,
+    ).order_by("sort_order", "created_at")
 
 
-def public_testimonials() -> QuerySet[Testimonial]:
-    return Testimonial.objects.filter(is_active=True).order_by("sort_order", "created_at")
+def public_start_buttons(*, language: Language) -> QuerySet[StartButton]:
+    return _prefetch_lang(
+        StartButton.objects.filter(is_active=True),
+        StartButtonTranslation,
+        language,
+    ).order_by("sort_order", "created_at")
 
 
-def admin_sliders() -> QuerySet[HomeSlider]:
-    return HomeSlider.objects.all()
+def public_testimonials(*, language: Language) -> QuerySet[Testimonial]:
+    return _prefetch_lang(
+        Testimonial.objects.filter(is_active=True),
+        TestimonialTranslation,
+        language,
+    ).order_by("sort_order", "created_at")
 
 
-def admin_start_buttons() -> QuerySet[StartButton]:
-    return StartButton.objects.all()
-
-
-def admin_testimonials() -> QuerySet[Testimonial]:
-    return Testimonial.objects.all()
+def public_about(*, language: Language) -> dict:
+    settings = get_site_settings()
+    row = SiteSettingsTranslation.objects.filter(settings=settings, language=language).first()
+    if row is None:
+        return {"title": "", "html": ""}
+    return {"title": row.about_title, "html": row.about_html}
 
 
 def admin_contact_messages(*, is_read: bool | None = None) -> QuerySet[ContactMessage]:

@@ -1,15 +1,23 @@
 # Admin — Referencias
 
-Testimonios: estrellas (1–5), comentario y nombre.
+Estrellas son globales. **Nombre y comentario** van por idioma.
 
 ```json
 {
   "stars": 5,
-  "comment": "El mejor recetario que he comprado.",
-  "name": "Lucía M.",
   "sort_order": 0,
-  "is_active": true
+  "is_active": true,
+  "translations": [
+    {
+      "language_code": "es",
+      "name": "Lucía M.",
+      "comment": "El mejor recetario que he comprado."
+    },
+    {
+      "language_code": "en",
+      "name": "Lucía M.",
+      "comment": "The best recipe book I've bought."
+    }
+  ]
 }
 ```
-
-CRUD en `/api/v1/admin/site/testimonials/`.

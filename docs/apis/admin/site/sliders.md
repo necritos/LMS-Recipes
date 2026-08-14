@@ -1,28 +1,30 @@
 # Admin — Sliders
 
-Hero del home: imagen de fondo, título, texto, enlace y texto del enlace.
-
-`POST /api/v1/admin/site/sliders/` — JSON o `multipart/form-data` (imagen).
+Imagen, orden y estado son globales. **Título, texto, enlace y texto del enlace** van por idioma.
 
 ```json
 {
-  "title": "Curso de pasta",
-  "text": "Aprende desde cero",
-  "link": "/cursos/pasta",
-  "link_text": "Ver curso",
   "sort_order": 0,
-  "is_active": true
+  "is_active": true,
+  "translations": [
+    {
+      "language_code": "es",
+      "title": "Curso de pasta",
+      "text": "Aprende desde cero",
+      "link": "/cursos/pasta",
+      "link_text": "Ver curso"
+    },
+    {
+      "language_code": "en",
+      "title": "Pasta course",
+      "text": "Learn from scratch",
+      "link": "/courses/pasta",
+      "link_text": "See course"
+    }
+  ]
 }
 ```
 
-Subir imagen:
+Multipart: `translations` como string JSON + `background_image`.
 
-```http
-POST /api/v1/admin/site/sliders/
-Content-Type: multipart/form-data
-
-title=Curso de pasta
-background_image=<archivo>
-```
-
-Público: solo `is_active=true`, en `GET /api/v1/public/site/`.
+Público: `GET /api/v1/public/site/?lang=es` — solo activos con traducción en ese idioma.

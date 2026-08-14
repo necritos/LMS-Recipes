@@ -14,74 +14,122 @@ def _make_image(name: str = "cover.png") -> SimpleUploadedFile:
 
 @pytest.mark.django_db
 class TestPublicSite:
-    def test_public_site_defaults(self, api_client):
-        response = api_client.get("/api/v1/public/site/")
+    def test_public_site_defaults(self, api_client, languages):
+        response = api_client.get("/api/v1/public/site/?lang=es")
         assert response.status_code == 200
         data = response.json()["data"]
         assert data["sliders"] == []
         assert data["start_buttons"] == []
         assert data["testimonials"] == []
-        assert "about" in data
-        assert "social" in data
-        assert "contact_info" in data
+        assert data["about"] == {"title": "", "html": ""}
 
-    def test_public_site_includes_active_content(self, staff_client, api_client):
+    def test_public_site_filters_by_language(self, staff_client, api_client, languages):
         staff_client.post(
             "/api/v1/admin/site/sliders/",
             {
-                "title": "Hero",
-                "text": "Hola",
-                "link": "/cursos",
-                "link_text": "Ver",
                 "is_active": True,
+                "translations": [
+                    {
+                        "language_code": "es",
+                        "title": "Hero ES",
+                        "text": "Hola",
+                        "link": "/cursos",
+                        "link_text": "Ver",
+                    },
+                    {
+                        "language_code": "en",
+                        "title": "Hero EN",
+                        "text": "Hello",
+                        "link": "/courses",
+                        "link_text": "See",
+                    },
+                ],
             },
             format="json",
         )
         staff_client.post(
             "/api/v1/admin/site/sliders/",
-            {"title": "Oculto", "is_active": False},
+            {
+                "is_active": False,
+                "translations": [{"language_code": "es", "title": "Oculto"}],
+            },
             format="json",
         )
         staff_client.post(
             "/api/v1/admin/site/start-buttons/",
             {
-                "title": "Cursos",
                 "color": "#FF00AA",
-                "link": "/cursos",
-                "link_text": "Empezar",
+                "translations": [
+                    {
+                        "language_code": "es",
+                        "title": "Cursos",
+                        "link": "/cursos",
+                        "link_text": "Empezar",
+                    }
+                ],
             },
             format="json",
         )
         staff_client.post(
             "/api/v1/admin/site/testimonials/",
-            {"stars": 5, "comment": "Excelente", "name": "Ana"},
+            {
+                "stars": 5,
+                "translations": [
+                    {"language_code": "es", "name": "Ana", "comment": "Excelente"},
+                    {"language_code": "en", "name": "Ana", "comment": "Excellent"},
+                ],
+            },
             format="json",
         )
-        response = api_client.get("/api/v1/public/site/")
-        data = response.json()["data"]
-        assert len(data["sliders"]) == 1
-        assert data["sliders"][0]["title"] == "Hero"
-        assert data["start_buttons"][0]["color"] == "#FF00AA"
-        assert data["testimonials"][0]["stars"] == 5
+        staff_client.patch(
+            "/api/v1/admin/site/settings/",
+            {
+                "translations": [
+                    {"language_code": "es", "about_title": "Sobre mí", "about_html": "<p>ES</p>"},
+                    {"language_code": "en", "about_title": "About me", "about_html": "<p>EN</p>"},
+                ]
+            },
+            format="json",
+        )
+
+        es = api_client.get("/api/v1/public/site/?lang=es").json()["data"]
+        assert es["sliders"][0]["title"] == "Hero ES"
+        assert es["about"]["title"] == "Sobre mí"
+        assert es["testimonials"][0]["comment"] == "Excelente"
+
+        en = api_client.get("/api/v1/public/site/?lang=en").json()["data"]
+        assert en["sliders"][0]["title"] == "Hero EN"
+        assert en["about"]["title"] == "About me"
+        assert en["start_buttons"] == []
+
+    def test_public_site_unknown_language(self, api_client, languages):
+        response = api_client.get("/api/v1/public/site/?lang=fr")
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "LANGUAGE_NOT_FOUND"
 
 
 @pytest.mark.django_db
 class TestAdminSiteSettings:
-    def test_update_about_and_social(self, staff_client):
+    def test_update_about_and_social(self, staff_client, languages):
         response = staff_client.patch(
             "/api/v1/admin/site/settings/",
             {
-                "about_title": "Sobre Petra",
-                "about_html": "<p>Hola</p>",
                 "social_instagram": "https://instagram.com/petra",
                 "phone_1": "+421 111",
                 "contact_email": "hola@petralicious.sk",
+                "translations": [
+                    {
+                        "language_code": "es",
+                        "about_title": "Sobre Petra",
+                        "about_html": "<p>Hola</p>",
+                    }
+                ],
             },
             format="json",
         )
         assert response.status_code == 200
         data = response.json()["data"]
-        assert data["about_title"] == "Sobre Petra"
+        assert data["translations"][0]["about_title"] == "Sobre Petra"
         assert data["storage_backend"] == "local"
         assert "firebase_credentials_json" not in data
 
@@ -131,14 +179,19 @@ class TestAdminSiteSettings:
 
 @pytest.mark.django_db
 class TestAdminSiteContent:
-    def test_slider_with_image(self, staff_client):
+    def test_slider_with_image(self, staff_client, languages):
         response = staff_client.post(
             "/api/v1/admin/site/sliders/",
-            {"title": "Banner", "background_image": _make_image()},
+            {
+                "translations": '[{"language_code":"es","title":"Banner"}]',
+                "background_image": _make_image(),
+            },
             format="multipart",
         )
         assert response.status_code == 201
-        assert response.json()["data"]["background_image_url"] is not None
+        body = response.json()["data"]
+        assert body["background_image_url"] is not None
+        assert body["translations"][0]["title"] == "Banner"
 
     def test_admin_requires_staff(self, api_client):
         response = api_client.get("/api/v1/admin/site/settings/")

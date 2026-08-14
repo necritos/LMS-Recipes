@@ -21,7 +21,11 @@ class JSONTranslationsMixin:
         return value
 
     def to_internal_value(self, data):
-        mutable = data.copy() if hasattr(data, "copy") else dict(data)
+        # QueryDict.copy() keeps getlist(); assigning a parsed JSON list would wrap it as [[...]].
+        if hasattr(data, "getlist"):
+            mutable = {key: data.get(key) for key in data}
+        else:
+            mutable = data.copy() if hasattr(data, "copy") else dict(data)
         raw = mutable.get("translations")
         if isinstance(raw, str):
             try:

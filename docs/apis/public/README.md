@@ -13,7 +13,7 @@ Endpoints públicos (sin autenticación).
 | GET `/public/recipes/` | [recipes.md](./recipes.md) |
 | GET `/public/recipes/{slug}/` | [recipe-detail.md](./recipe-detail.md) |
 
-Query param común: `?lang=es` (default: `es`).
+Query param común: `?lang=es` (default: `es`). Incluye catálogo y `GET /public/site/`.
 
 Guía multi-idioma: [../admin/catalog/languages.md](../admin/catalog/languages.md).
 

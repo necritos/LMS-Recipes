@@ -1,18 +1,25 @@
 # Admin — Por dónde empezar
 
-Botones del home: color, imagen, título, enlace y texto del enlace.
-
-`POST /api/v1/admin/site/start-buttons/`
+Color e imagen son globales. **Título, enlace y texto del enlace** van por idioma.
 
 ```json
 {
   "color": "#C45C26",
-  "title": "Cursos",
-  "link": "/cursos",
-  "link_text": "Empezar",
   "sort_order": 0,
-  "is_active": true
+  "is_active": true,
+  "translations": [
+    {
+      "language_code": "es",
+      "title": "Cursos",
+      "link": "/cursos",
+      "link_text": "Empezar"
+    },
+    {
+      "language_code": "en",
+      "title": "Courses",
+      "link": "/courses",
+      "link_text": "Start"
+    }
+  ]
 }
 ```
-
-`color` en hexadecimal (`#RGB` o `#RRGGBB`). Imagen vía multipart campo `image`.

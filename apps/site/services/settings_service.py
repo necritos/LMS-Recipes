@@ -6,6 +6,7 @@ from apps.common.exceptions import BusinessError
 from apps.common.storage import invalidate_media_storage_cache
 from apps.site.models import SiteSettings
 from apps.site.selectors import get_site_settings
+from apps.site.services.i18n import upsert_settings_translations
 
 
 def _validate_firebase_payload(*, enabled: bool, project_id: str, bucket: str, credentials: str):
@@ -56,8 +57,11 @@ def update_site_settings(*, fields: dict) -> SiteSettings:
         credentials=creds or "",
     )
 
+    translations = fields.pop("translations", None)
     for key, value in fields.items():
         setattr(settings, key, value)
     settings.save()
+    if translations:
+        upsert_settings_translations(settings=settings, translations=translations)
     invalidate_media_storage_cache()
     return settings

@@ -1,9 +1,10 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.catalog.selectors import get_active_language, resolve_language_code
 from apps.site.api.serializers import (
     ContactCreateSerializer,
     NewsletterSubscribeSerializer,
@@ -11,6 +12,7 @@ from apps.site.api.serializers import (
 )
 from apps.site.selectors import (
     get_site_settings,
+    public_about,
     public_sliders,
     public_start_buttons,
     public_testimonials,
@@ -21,11 +23,16 @@ from apps.site.services.inbox_service import create_contact_message, subscribe_n
 class PublicSiteView(APIView):
     permission_classes = [AllowAny]
 
-    @extend_schema(tags=["Public — Site"])
+    @extend_schema(
+        tags=["Public — Site"],
+        parameters=[OpenApiParameter("lang", str, description="Código de idioma (default: es)")],
+    )
     def get(self, request):
+        lang = resolve_language_code(request.query_params.get("lang"))
+        language = get_active_language(code=lang)
         settings = get_site_settings()
         payload = {
-            "about": {"title": settings.about_title, "html": settings.about_html},
+            "about": public_about(language=language),
             "contact_info": {
                 "phone_1": settings.phone_1,
                 "phone_2": settings.phone_2,
@@ -37,9 +44,9 @@ class PublicSiteView(APIView):
                 "facebook": settings.social_facebook,
                 "pinterest": settings.social_pinterest,
             },
-            "sliders": public_sliders(),
-            "start_buttons": public_start_buttons(),
-            "testimonials": public_testimonials(),
+            "sliders": public_sliders(language=language),
+            "start_buttons": public_start_buttons(language=language),
+            "testimonials": public_testimonials(language=language),
         }
         serializer = PublicSiteSerializer(payload, context={"request": request})
         return Response({"data": serializer.data, "meta": {}})

@@ -395,13 +395,13 @@ Prefijo base: `/api/v1/`
 
 #### Checklist
 
-- [x] App `site` con `SiteSettings` (sobre mí HTML, redes, teléfonos, email)
+- [x] App `site` con `SiteSettings` (redes, teléfonos, email) y traducciones de «sobre mí»
 - [x] Firebase Storage configurable por API admin (`PATCH /admin/site/settings/`)
 - [x] Storage dinámico: Firebase → DO Spaces → filesystem (todas las ImageField)
-- [x] CRUD sliders (imagen, título, texto, enlace, texto enlace)
-- [x] CRUD «por dónde empezar» (color, imagen, título, enlace, texto enlace)
-- [x] CRUD referencias (estrellas, comentario, nombre)
-- [x] API pública `GET /api/v1/public/site/`
+- [x] CRUD sliders multi-idioma (imagen global; título/texto/enlace por idioma)
+- [x] CRUD «por dónde empezar» multi-idioma (color/imagen globales)
+- [x] CRUD referencias multi-idioma (estrellas globales; nombre/comentario por idioma)
+- [x] API pública `GET /api/v1/public/site/?lang=`
 - [x] Formulario contacto `POST /api/v1/public/contact/` + inbox admin leído/no leído
 - [x] Newsletter `POST /api/v1/public/newsletter/` + listado admin
 - [x] Tests y documentación en `docs/apis/`
@@ -409,7 +409,7 @@ Prefijo base: `/api/v1/`
 #### Criterio de aceptación
 
 - [x] Admin configura Firebase y el JSON de credenciales no se expone en GET
-- [x] Home público devuelve sliders/botones/referencias activos
+- [x] Home público filtra sliders, sobre mí, botones y referencias por `?lang=` (mismo sistema que el catálogo)
 - [x] Contacto se marca como leído en admin; newsletter rechaza emails duplicados
 
 **Fase completada:** ✅

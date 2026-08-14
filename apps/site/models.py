@@ -1,6 +1,7 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from apps.catalog.models import Language
 from apps.common.models import TimeStampedModel, UUIDModel
 
 
@@ -11,9 +12,6 @@ def site_image_upload_path(instance, filename: str) -> str:
 
 class SiteSettings(UUIDModel, TimeStampedModel):
     singleton_key = models.CharField(max_length=16, unique=True, default="default")
-
-    about_title = models.CharField(max_length=255, blank=True)
-    about_html = models.TextField(blank=True)
 
     social_instagram = models.CharField(max_length=500, blank=True)
     social_tiktok = models.CharField(max_length=500, blank=True)
@@ -37,12 +35,35 @@ class SiteSettings(UUIDModel, TimeStampedModel):
         return "Site settings"
 
 
+class SiteSettingsTranslation(UUIDModel, TimeStampedModel):
+    settings = models.ForeignKey(
+        SiteSettings,
+        on_delete=models.CASCADE,
+        related_name="translations",
+    )
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.PROTECT,
+        related_name="site_settings_translations",
+    )
+    about_title = models.CharField(max_length=255, blank=True)
+    about_html = models.TextField(blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["settings", "language"],
+                name="uniq_site_settings_translation_lang",
+            )
+        ]
+        ordering = ["language__code"]
+
+    def __str__(self) -> str:
+        return f"about [{self.language.code}]"
+
+
 class HomeSlider(UUIDModel, TimeStampedModel):
     background_image = models.ImageField(upload_to=site_image_upload_path, blank=True)
-    title = models.CharField(max_length=255)
-    text = models.TextField(blank=True)
-    link = models.CharField(max_length=500, blank=True)
-    link_text = models.CharField(max_length=120, blank=True)
     sort_order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -50,15 +71,36 @@ class HomeSlider(UUIDModel, TimeStampedModel):
         ordering = ["sort_order", "created_at"]
 
     def __str__(self) -> str:
-        return self.title
+        return f"slider {self.pk}"
+
+
+class HomeSliderTranslation(UUIDModel, TimeStampedModel):
+    slider = models.ForeignKey(HomeSlider, on_delete=models.CASCADE, related_name="translations")
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.PROTECT,
+        related_name="slider_translations",
+    )
+    title = models.CharField(max_length=255)
+    text = models.TextField(blank=True)
+    link = models.CharField(max_length=500, blank=True)
+    link_text = models.CharField(max_length=120, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["slider", "language"], name="uniq_slider_translation_lang"
+            )
+        ]
+        ordering = ["language__code"]
+
+    def __str__(self) -> str:
+        return f"{self.title} [{self.language.code}]"
 
 
 class StartButton(UUIDModel, TimeStampedModel):
     color = models.CharField(max_length=7, default="#000000")
     image = models.ImageField(upload_to=site_image_upload_path, blank=True)
-    title = models.CharField(max_length=255)
-    link = models.CharField(max_length=500, blank=True)
-    link_text = models.CharField(max_length=120, blank=True)
     sort_order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -66,15 +108,37 @@ class StartButton(UUIDModel, TimeStampedModel):
         ordering = ["sort_order", "created_at"]
 
     def __str__(self) -> str:
-        return self.title
+        return f"start-button {self.pk}"
+
+
+class StartButtonTranslation(UUIDModel, TimeStampedModel):
+    button = models.ForeignKey(StartButton, on_delete=models.CASCADE, related_name="translations")
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.PROTECT,
+        related_name="start_button_translations",
+    )
+    title = models.CharField(max_length=255)
+    link = models.CharField(max_length=500, blank=True)
+    link_text = models.CharField(max_length=120, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["button", "language"],
+                name="uniq_start_button_translation_lang",
+            )
+        ]
+        ordering = ["language__code"]
+
+    def __str__(self) -> str:
+        return f"{self.title} [{self.language.code}]"
 
 
 class Testimonial(UUIDModel, TimeStampedModel):
     stars = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
-    comment = models.TextField()
-    name = models.CharField(max_length=200)
     sort_order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -82,7 +146,34 @@ class Testimonial(UUIDModel, TimeStampedModel):
         ordering = ["sort_order", "created_at"]
 
     def __str__(self) -> str:
-        return self.name
+        return f"testimonial {self.pk}"
+
+
+class TestimonialTranslation(UUIDModel, TimeStampedModel):
+    testimonial = models.ForeignKey(
+        Testimonial,
+        on_delete=models.CASCADE,
+        related_name="translations",
+    )
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.PROTECT,
+        related_name="testimonial_translations",
+    )
+    name = models.CharField(max_length=200)
+    comment = models.TextField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["testimonial", "language"],
+                name="uniq_testimonial_translation_lang",
+            )
+        ]
+        ordering = ["language__code"]
+
+    def __str__(self) -> str:
+        return f"{self.name} [{self.language.code}]"
 
 
 class ContactMessage(UUIDModel, TimeStampedModel):

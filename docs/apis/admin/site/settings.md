@@ -19,19 +19,30 @@ Todas las `ImageField` (portadas de cursos/recetas, sliders, botones) usan este 
 
 ## PATCH — ejemplo de contenido
 
+Redes y teléfonos son globales. **Sobre mí** va en `translations` por idioma.
+
 ```json
 {
-  "about_title": "Sobre mí",
-  "about_html": "<p>Chef y docente…</p>",
   "social_instagram": "https://instagram.com/petralicious",
-  "social_tiktok": "",
-  "social_facebook": "",
-  "social_pinterest": "",
   "phone_1": "+421 111 222",
-  "phone_2": "",
-  "contact_email": "hola@petralicious.sk"
+  "contact_email": "hola@petralicious.sk",
+  "translations": [
+    {
+      "language_code": "es",
+      "about_title": "Sobre mí",
+      "about_html": "<p>Chef y docente…</p>"
+    },
+    {
+      "language_code": "en",
+      "about_title": "About me",
+      "about_html": "<p>Chef and teacher…</p>"
+    }
+  ]
 }
 ```
+
+En GET, `translations` lista `language_code`, `about_title`, `about_html`.
+Si omites `translations` en un PATCH, se conservan las traducciones existentes.
 
 ## PATCH — activar Firebase
 

@@ -1,29 +1,23 @@
 # GET /api/v1/public/site/
 
-Payload del home: sobre mí, redes, teléfonos, sliders, botones «por dónde empezar» y referencias.
+Payload del home filtrado por idioma (`?lang=es` default).
 
-Sin autenticación.
+Solo aparecen sliders, botones y referencias **activos** y **con traducción** en ese idioma.
+
+## Query
+
+| Param | Default | Descripción |
+|-------|---------|-------------|
+| `lang` | `es` | Código de idioma activo |
 
 ## Response 200
 
 ```json
 {
   "data": {
-    "about": {
-      "title": "Sobre mí",
-      "html": "<p>Texto editable en HTML</p>"
-    },
-    "contact_info": {
-      "phone_1": "+421 111 222",
-      "phone_2": "",
-      "email": "hola@petralicious.sk"
-    },
-    "social": {
-      "instagram": "https://instagram.com/...",
-      "tiktok": "",
-      "facebook": "",
-      "pinterest": ""
-    },
+    "about": { "title": "Sobre mí", "html": "<p>…</p>" },
+    "contact_info": { "phone_1": "+421 111", "phone_2": "", "email": "hola@petralicious.sk" },
+    "social": { "instagram": "https://instagram.com/...", "tiktok": "", "facebook": "", "pinterest": "" },
     "sliders": [
       {
         "id": "uuid",
@@ -32,33 +26,17 @@ Sin autenticación.
         "link": "/cursos",
         "link_text": "Ver cursos",
         "sort_order": 0,
-        "background_image_url": "https://firebasestorage.googleapis.com/..."
+        "background_image_url": "https://…"
       }
     ],
-    "start_buttons": [
-      {
-        "id": "uuid",
-        "color": "#C45C26",
-        "title": "Cursos",
-        "link": "/cursos",
-        "link_text": "Empezar",
-        "sort_order": 0,
-        "image_url": "https://..."
-      }
-    ],
-    "testimonials": [
-      {
-        "id": "uuid",
-        "stars": 5,
-        "comment": "Excelente contenido",
-        "name": "Ana",
-        "sort_order": 0
-      }
-    ]
+    "start_buttons": [],
+    "testimonials": []
   },
   "meta": {}
 }
 ```
 
-Solo se incluyen sliders, botones y referencias con `is_active=true`.
-Las imágenes salen de Firebase Storage si el admin lo activó; si no, URL local.
+`contact_info` y `social` no se traducen (datos de contacto globales).
+Sobre mí, sliders, botones y referencias sí.
+
+Si el idioma no existe o está inactivo: `404 LANGUAGE_NOT_FOUND`.

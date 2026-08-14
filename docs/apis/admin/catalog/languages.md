@@ -35,13 +35,17 @@ Los idiomas se crean **una sola vez** en admin. El contenido no se duplica enter
 
 ### 2. Traducciones (`*Translation`)
 
-Categorías, cursos y recetas tienen tablas hijas de traducción:
+Categorías, cursos, recetas y textos del home (`site`) tienen tablas hijas de traducción:
 
 | Entidad | Tabla | Campos traducidos |
 |---------|-------|-------------------|
 | Categoría | `CategoryTranslation` | `name`, `description` |
 | Curso | `CourseTranslation` | `title`, `description`, `meta_title`, `meta_description` |
 | Receta | `RecipeTranslation` | `title`, `description`, `meta_title`, `meta_description` |
+| Sobre mí | `SiteSettingsTranslation` | `about_title`, `about_html` |
+| Slider | `HomeSliderTranslation` | `title`, `text`, `link`, `link_text` |
+| Por dónde empezar | `StartButtonTranslation` | `title`, `link`, `link_text` |
+| Referencias | `TestimonialTranslation` | `name`, `comment` |
 
 Cada traducción enlaza `(entidad, language)` de forma única: un curso puede tener una fila para `es` y otra para `en`, pero no dos filas en el mismo idioma.
 
@@ -62,14 +66,16 @@ Los visitantes eligen idioma con query param:
 ```http
 GET /api/v1/public/courses/?lang=es
 GET /api/v1/public/courses/pasta-101/?lang=en
+GET /api/v1/public/site/?lang=es
 ```
 
 | Regla | Comportamiento |
 |-------|----------------|
 | `?lang=` omitido | Default `es` |
 | Idioma inactivo (`is_active=false`) | 404 `LANGUAGE_NOT_FOUND` |
-| Curso sin traducción en ese idioma | **No aparece** en listados ni detalle |
-| Solo `status=published` | Visible en APIs públicas |
+| Curso/receta/categoría sin traducción en ese idioma | **No aparece** en listados ni detalle |
+| Slider / botón / referencia sin traducción en ese idioma | **No aparece** en `GET /public/site/` |
+| Solo `status=published` | Visible en APIs públicas de catálogo |
 
 `GET /api/v1/public/languages/` devuelve solo idiomas con `is_active=true` (para selector en frontend).
 
