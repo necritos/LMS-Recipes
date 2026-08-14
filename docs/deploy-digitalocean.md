@@ -102,6 +102,18 @@ CORS_ALLOWED_ORIGINS=https://petralicious.sk,https://www.petralicious.sk,http://
 systemctl restart recetario-api
 ```
 
+## Job diario: accesos vencidos
+
+El 403 `ACCESS_EXPIRED` se calcula en tiempo real con `expires_at`. El job Celery `content.expire_access_grants` cuenta grants vencidos (métrica / futuro email).
+
+```bash
+chmod +x /var/www/recetario-backend/deploy/expire_access.sh
+cp /var/www/recetario-backend/deploy/expire_access.cron /etc/cron.d/recetario-expire-access
+chmod 644 /etc/cron.d/recetario-expire-access
+```
+
+Hora: 08:00 (`America/Lima`, `CELERY_TIMEZONE`). Alternativa: `make beat` / unidad systemd Celery Beat con `CELERY_BEAT_SCHEDULE`.
+
 ## Certificado SSL (Let's Encrypt / certbot)
 
 | Tema | Detalle |

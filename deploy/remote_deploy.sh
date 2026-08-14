@@ -21,6 +21,8 @@ sudo -u "$APP_USER" "$APP_DIR/.venv/bin/python" manage.py migrate --noinput
 echo "==> Collectstatic"
 sudo -u "$APP_USER" "$APP_DIR/.venv/bin/python" manage.py collectstatic --noinput
 
+chmod +x "$APP_DIR/deploy/expire_access.sh"
+
 echo "==> Restart services"
 systemctl restart recetario-api recetario-worker
 systemctl is-active --quiet recetario-api

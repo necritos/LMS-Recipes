@@ -5,6 +5,8 @@ Auth: JWT staff.
 
 Credenciales de video **desde el admin**, igual que Firebase: nada de API keys en `.env`.
 
+Guía paso a paso (dashboard + PATCH): [configurar-integraciones.md](../../../configurar-integraciones.md).
+
 ## GET — no expone secretos
 
 `bunny_api_key` y `bunny_token_key` son **write-only**. La lectura devuelve:
@@ -20,8 +22,8 @@ Credenciales de video **desde el admin**, igual que Firebase: nada de API keys e
 
 ## PATCH — activar Bunny
 
-En Bunny Stream → Library → API → **API Key**.  
-Token: Library → Security → **Token Authentication** (enable) → copiar la key.
+En Bunny Stream → tu library → pestaña **API**: Library ID, CDN hostname y **API Key**.  
+La **Token key** no está ahí: menú **Security** de la misma library → Token authentication. Si no hay key aparte, usa la API Key también como `bunny_token_key`.
 
 ```json
 {

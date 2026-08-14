@@ -1,0 +1,5 @@
+# Job diario: AccessGrant vencidos (08:00 America/Lima = CELERY_TIMEZONE).
+# Copiar a /etc/cron.d/recetario-expire-access (permisos 644, owner root).
+SHELL=/bin/bash
+PATH=/usr/bin:/bin
+0 8 * * * recetario /var/www/recetario-backend/deploy/expire_access.sh >> /var/log/recetario-expire-access.log 2>&1

@@ -38,12 +38,14 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 |-----------|-------------|
 | [site/stripe.md](./site/stripe.md) | Keys, webhook, Apple Pay / Google Pay (admin, no env) |
 
+## Dashboard
+
+| Documento | Descripción |
+|-----------|-------------|
+| [dashboard.md](./dashboard.md) | Ingresos, ventas recientes, top productos, serie temporal |
+
 ## Usuarios
 
 | Documento | Descripción |
 |-----------|-------------|
 | [users/README.md](./users/README.md) | Listado y detalle de usuarios finales |
-
-## Próximas fases
-
-- Fase 6: Dashboard en `/admin/dashboard/`

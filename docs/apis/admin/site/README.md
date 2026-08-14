@@ -2,6 +2,8 @@
 
 JWT `type=staff`. Prefijo `/api/v1/admin/`.
 
+**Cómo obtener keys y pegarlas en admin:** [configurar-integraciones.md](../../../configurar-integraciones.md) (Firebase, Bunny, Stripe).
+
 | Recurso | Guía | Endpoints |
 |---------|------|-----------|
 | Ajustes + Firebase Storage | [settings.md](./settings.md) | `GET/PATCH /site/settings/` |

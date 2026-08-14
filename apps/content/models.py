@@ -126,6 +126,23 @@ class AccessGrant(UUIDModel, TimeStampedModel):
         return f"grant {self.user_id} → {target}"
 
 
+class LessonProgress(UUIDModel, TimeStampedModel):
+    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name="lesson_progress")
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="progress")
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    last_viewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "lesson"], name="uniq_lesson_progress_user"),
+        ]
+        ordering = ["-last_viewed_at", "-updated_at"]
+
+    def __str__(self) -> str:
+        return f"progress {self.user_id} lesson {self.lesson_id}"
+
+
 class VideoAccessToken(UUIDModel, TimeStampedModel):
     user = models.ForeignKey(
         UserAccount,

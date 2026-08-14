@@ -1,7 +1,7 @@
 from django.db.models import Prefetch
 
 from apps.catalog.models import CourseTranslation, Language, RecipeTranslation
-from apps.commerce.models import Cart
+from apps.commerce.models import Cart, Purchase
 
 
 def cart_for_user(*, user, language: Language | None = None) -> Cart:
@@ -24,3 +24,24 @@ def cart_for_user(*, user, language: Language | None = None) -> Cart:
             ),
         )
     return qs.get()
+
+
+def purchases_for_user(*, user, language: Language):
+    return (
+        Purchase.objects.filter(user=user)
+        .select_related("order", "course", "recipe", "access_grant")
+        .prefetch_related(
+            "order__items",
+            Prefetch(
+                "course__translations",
+                queryset=CourseTranslation.objects.filter(language=language),
+                to_attr="active_translations",
+            ),
+            Prefetch(
+                "recipe__translations",
+                queryset=RecipeTranslation.objects.filter(language=language),
+                to_attr="active_translations",
+            ),
+        )
+        .order_by("-created_at")
+    )

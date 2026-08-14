@@ -5,6 +5,8 @@ Auth: JWT staff.
 
 Configura textos de home, redes, teléfonos y **dónde se guardan las imágenes**.
 
+Guía paso a paso (consola + PATCH): [configurar-integraciones.md](../../../configurar-integraciones.md).
+
 Video (Bunny.net): [bunny.md](./bunny.md) — `GET/PATCH /site/bunny/`.  
 Pagos (Stripe): [stripe.md](./stripe.md) — `GET/PATCH /site/stripe/`.
 

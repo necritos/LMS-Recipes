@@ -6,6 +6,8 @@ Auth: JWT staff.
 Las **claves se guardan aquí**, igual que Firebase y Bunny: no van en `.env`.  
 El GET **nunca** devuelve `stripe_secret_key` ni `stripe_webhook_secret`.
 
+Guía corta de las tres integraciones: [configurar-integraciones.md](../../../configurar-integraciones.md).
+
 ---
 
 ## Qué activar en Stripe Dashboard

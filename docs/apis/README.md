@@ -28,6 +28,8 @@ https://api.tudominio.com/api/v1/ # producción
 | Auth header | `Authorization: Bearer <access_token>` |
 | OpenAPI / Swagger | `/api/docs/` y `/api/schema/` |
 
+**Integraciones (Firebase, Bunny, Stripe):** [configurar-integraciones.md](../configurar-integraciones.md) — qué activar en cada dashboard y qué `PATCH` pegar en admin.
+
 ## JWT — tipos de token
 
 | type | Actor | Modelo | Login |
@@ -85,3 +87,11 @@ Ver [admin/content.md](./admin/content.md), [admin/site/bunny.md](./admin/site/b
 | DELETE | `/me/cart/items/{id}/` | [me/cart.md](./me/cart.md) |
 | POST | `/checkout/create-session/` | [checkout.md](./checkout.md) |
 | POST | `/webhooks/stripe/` | [webhooks/stripe.md](./webhooks/stripe.md) |
+
+## Índice — APIs de usuario (Fase 5)
+
+Ver [me/README.md](./me/README.md): compras, biblioteca, progreso y continuar viendo.
+
+## Índice — Admin dashboard (Fase 6)
+
+Ver [admin/dashboard.md](./admin/dashboard.md).

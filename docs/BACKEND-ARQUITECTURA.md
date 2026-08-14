@@ -5,7 +5,8 @@
 **Referencia:** BEDERR-BACKEND  
 **Despliegue:** Digital Ocean
 
-> Plan de trabajo detallado: [`PLAN-DESARROLLO.md`](./PLAN-DESARROLLO.md)
+> Plan de trabajo detallado: [`PLAN-DESARROLLO.md`](./PLAN-DESARROLLO.md)  
+> Integraciones: [`configurar-integraciones.md`](./configurar-integraciones.md)
 
 ---
 
@@ -101,7 +102,7 @@ Google OAuth: flujo authorization code → crear/vincular `UserAccount`.
 |------|------------|--------|
 | `send_welcome_email` | On signup | Email bienvenida |
 | `send_purchase_confirmation` | On webhook | Email compra |
-| `expire_access_grants` | Diario | Marcar accesos vencidos |
+| `expire_access_grants` | Diario (cron / beat) | Cuenta grants con `expires_at` vencido |
 | `process_stripe_webhook` | On event | Procesar pago async |
 
 ---

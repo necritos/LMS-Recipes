@@ -2,6 +2,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-only-change-in-production")
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     "apps.site",
     "apps.content",
     "apps.commerce",
+    "apps.analytics",
 ]
 
 AUTH_USER_MODEL = "accounts.StaffUser"
@@ -135,7 +138,11 @@ SPECTACULAR_SETTINGS = {
             "description": "CMS del sitio, Firebase, Bunny.net, Stripe, inbox y newsletter",
         },
         {"name": "Admin — Content", "description": "Módulos, lecciones y video Bunny"},
-        {"name": "Me", "description": "Carrito y contenido del usuario autenticado"},
+        {
+            "name": "Me",
+            "description": "Carrito, compras, biblioteca y progreso del usuario autenticado",
+        },
+        {"name": "Admin — Analytics", "description": "Dashboard de ingresos y ventas"},
         {"name": "Checkout", "description": "Sesión Stripe Checkout"},
         {"name": "Webhooks", "description": "Webhooks de Stripe"},
     ],
@@ -176,3 +183,9 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BEAT_SCHEDULE = {
+    "expire-access-grants": {
+        "task": "content.expire_access_grants",
+        "schedule": crontab(hour=8, minute=0),
+    },
+}

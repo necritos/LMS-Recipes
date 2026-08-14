@@ -3,6 +3,7 @@ from django.contrib import admin
 from apps.content.models import (
     AccessGrant,
     Lesson,
+    LessonProgress,
     LessonTranslation,
     Module,
     ModuleTranslation,
@@ -36,6 +37,12 @@ class LessonAdmin(admin.ModelAdmin):
 class AccessGrantAdmin(admin.ModelAdmin):
     list_display = ("user", "course", "recipe", "expires_at", "is_revoked", "source")
     list_filter = ("source", "is_revoked")
+
+
+@admin.register(LessonProgress)
+class LessonProgressAdmin(admin.ModelAdmin):
+    list_display = ("user", "lesson", "completed", "last_viewed_at", "updated_at")
+    list_filter = ("completed",)
 
 
 @admin.register(VideoAccessToken)

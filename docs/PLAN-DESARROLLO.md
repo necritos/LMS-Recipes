@@ -118,6 +118,7 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
 # Stripe, Bunny.net y Firebase: credenciales en admin (nunca en .env)
+# Guía: docs/configurar-integraciones.md
 # PATCH /api/v1/admin/site/stripe/
 # PATCH /api/v1/admin/site/bunny/
 # PATCH /api/v1/admin/site/settings/
@@ -234,7 +235,7 @@ Prefijo base: `/api/v1/`
 |---------|-----------|----------|
 | `/api/v1/public/` | Visitantes | Catálogo, detalle curso/receta, idiomas, home, contacto, newsletter |
 | `/api/v1/auth/` | Registro/login | login, register, Google OAuth, reset password |
-| `/api/v1/me/` | Usuario autenticado | Carrito, lecciones/video firmado, (Fase 5: compras, progreso) |
+| `/api/v1/me/` | Usuario autenticado | Carrito, compras, biblioteca, progreso, video firmado |
 | `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe Checkout |
 | `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, Stripe, usuarios, dashboard |
 | `/api/v1/webhooks/stripe/` | Stripe | Eventos de pago |
@@ -270,8 +271,8 @@ Prefijo base: `/api/v1/`
 | 2.5 — Sitio / Firebase / contacto | 3 | ✅ Completada |
 | 3 — Contenido y video | 4 | ✅ Completada |
 | 4 — E-commerce | 5 | ✅ Completada |
-| 5 — APIs usuario | 6 | ⬜ Pendiente |
-| 6 — Admin y analytics | 7 | ⬜ Pendiente |
+| 5 — APIs usuario | 6 | ✅ Completada |
+| 6 — Admin y analytics | 7 | ✅ Completada |
 | 7 — Despliegue y QA | 8 | 🔄 En curso (Droplet + CI/CD) |
 
 ---
@@ -479,26 +480,26 @@ Prefijo base: `/api/v1/`
 
 #### Checklist
 
-- [ ] API `GET /api/v1/me/purchases/` — listado de compras
-- [ ] API `GET /api/v1/me/courses/` — cursos con acceso activo y fecha expiración
-- [ ] API `GET /api/v1/me/recipes/` — recetas con acceso activo y fecha expiración
-- [ ] Modelo `LessonProgress` (usuario, lección, completada, última vista)
-- [ ] API `POST /api/v1/me/lessons/{id}/complete/` — marcar lección completada
-- [ ] API `GET /api/v1/me/progress/{course_id}/` — progreso del curso
-- [ ] Regla: cursos expiran a los 365 días desde compra
-- [ ] Regla: recetas respetan lifetime o 365 días según producto
-- [ ] Task Celery `expire_access_grants` — marcar accesos vencidos
-- [ ] Programar job diario (cron / App Platform job)
-- [ ] API "continuar viendo": última lección vista por curso
-- [ ] Tests de expiración de acceso y progreso de lecciones
+- [x] API `GET /api/v1/me/purchases/` — listado de compras
+- [x] API `GET /api/v1/me/courses/` — cursos con acceso activo y fecha expiración
+- [x] API `GET /api/v1/me/recipes/` — recetas con acceso activo y fecha expiración
+- [x] Modelo `LessonProgress` (usuario, lección, completada, última vista)
+- [x] API `POST /api/v1/me/lessons/{id}/complete/` — marcar lección completada
+- [x] API `GET /api/v1/me/progress/{course_id}/` — progreso del curso
+- [x] Regla: cursos expiran a los 365 días desde compra *(grant en webhook Fase 4; listados filtran por `expires_at`)*
+- [x] Regla: recetas respetan lifetime o 365 días según producto *(idem)*
+- [x] Task Celery `content.expire_access_grants` — cuenta accesos vencidos (`expires_at` ya niega el video en tiempo real)
+- [x] Programar job diario (cron `deploy/expire_access.cron` + `CELERY_BEAT_SCHEDULE`)
+- [x] API "continuar viendo": `POST /me/lessons/{id}/view/` y `continue_lesson` en `/me/courses/` y `/me/progress/{id}/`
+- [x] Tests de expiración de acceso y progreso de lecciones
 
 #### Criterio de aceptación
 
-- [ ] APIs `/me/` devuelven productos comprados con fechas de expiración
-- [ ] Endpoints de contenido responden 403 tras expiración de acceso
-- [ ] Progreso de lecciones se persiste y se expone vía API
+- [x] APIs `/me/` devuelven productos comprados con fechas de expiración
+- [x] Endpoints de contenido responden 403 tras expiración de acceso
+- [x] Progreso de lecciones se persiste y se expone vía API
 
-**Fase completada:** ⬜
+**Fase completada:** ✅
 
 ---
 
@@ -508,25 +509,25 @@ Prefijo base: `/api/v1/`
 
 #### Checklist
 
-- [ ] Crear app `analytics`
-- [ ] API `GET /api/v1/admin/dashboard/` — resumen general
-- [ ] Métrica: ingresos totales y por período (día/semana/mes)
-- [ ] Métrica: ventas recientes (últimas N órdenes)
-- [ ] Métrica: productos más vendidos
+- [x] Crear app `analytics`
+- [x] API `GET /api/v1/admin/dashboard/` — resumen general
+- [x] Métrica: ingresos totales y por período (día/semana/mes)
+- [x] Métrica: ventas recientes (últimas N órdenes)
+- [x] Métrica: productos más vendidos
 - [x] API `GET /api/v1/admin/users/` — listado paginado *(implementado en Fase 2)*
 - [x] API `GET /api/v1/admin/users/{id}/` — detalle **con historial de compras** *(detalle en Fase 2; `purchases` real en Fase 4)*
 - [x] API gestión idiomas: activar/desactivar (`/admin/languages/`) *(implementado en Fase 2)*
 - [x] Documentar config Stripe (admin `/admin/site/stripe/`, toggle test/live; no env) *(implementado en Fase 4)*
-- [ ] Endpoint `GET /api/v1/admin/dashboard/revenue/` — serie temporal ingresos (JSON)
-- [ ] Tests de dashboard y endpoints admin analytics
+- [x] Endpoint `GET /api/v1/admin/dashboard/revenue/` — serie temporal ingresos (JSON)
+- [x] Tests de dashboard y endpoints admin analytics
 
 #### Criterio de aceptación
 
-- [ ] API dashboard devuelve ingresos reales calculados desde `Order`
+- [x] API dashboard devuelve ingresos reales calculados desde `Order`
 - [x] Admin puede ver historial de compras en detalle de usuario *(GET `/admin/users/{id}/` campo `purchases`, Fase 4)*
-- [ ] Estadísticas coinciden con datos de `Order` en BD
+- [x] Estadísticas coinciden con datos de `Order` en BD
 
-**Fase completada:** ⬜
+**Fase completada:** ✅
 
 ---
 
@@ -675,4 +676,5 @@ Las reglas de desarrollo para agentes y desarrolladores están en:
 - Mockups UI solo referencia visual (no desarrollo): `../RECETARIO-TEMPLATES/`
 - [Digital Ocean App Platform](https://docs.digitalocean.com/products/app-platform/)
 - [Bunny.net Stream API](https://docs.bunny.net/docs/stream)
+- Guía de integraciones (Firebase, Bunny, Stripe): [`docs/configurar-integraciones.md`](./configurar-integraciones.md)
 - [Stripe Checkout](https://stripe.com/docs/checkout)
