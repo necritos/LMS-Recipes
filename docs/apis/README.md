@@ -16,6 +16,7 @@ https://api.tudominio.com/api/v1/ # producción
 | [auth/](./auth/) | Usuario final | `/api/v1/auth/` | JWT `type=user` |
 | [public/](./public/) | Visitantes | `/api/v1/public/` | Ninguna |
 | [admin/](./admin/) | Staff / administración | `/api/v1/admin/` | JWT `type=staff` |
+| [me/](./me/) | Usuario autenticado | `/api/v1/me/` | JWT `type=user` |
 
 ## Convenciones globales
 
@@ -70,3 +71,7 @@ Ver [admin/users/README.md](./admin/users/README.md).
 ## Índice — Sitio / CMS
 
 Ver [admin/site/README.md](./admin/site/README.md) y [public/site.md](./public/site.md).
+
+## Índice — Contenido y video (Fase 3)
+
+Ver [admin/content.md](./admin/content.md), [admin/site/bunny.md](./admin/site/bunny.md) y [me/content.md](./me/content.md).

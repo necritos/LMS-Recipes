@@ -36,8 +36,19 @@ class TestimonialTranslationInline(admin.TabularInline):
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
-    list_display = ("singleton_key", "firebase_enabled", "contact_email", "updated_at")
+    list_display = (
+        "singleton_key",
+        "firebase_enabled",
+        "bunny_enabled",
+        "contact_email",
+        "updated_at",
+    )
     inlines = [SiteSettingsTranslationInline]
+    exclude = (
+        "firebase_credentials_json",
+        "bunny_api_key",
+        "bunny_token_key",
+    )
 
 
 @admin.register(HomeSlider)

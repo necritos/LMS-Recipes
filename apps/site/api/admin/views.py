@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from apps.common.permissions import IsStaffUser
 from apps.site.api.serializers import (
+    AdminBunnySettingsSerializer,
     AdminContactMessageSerializer,
     AdminContactReadSerializer,
     AdminNewsletterSerializer,
@@ -38,7 +39,7 @@ from apps.site.services.content_service import (
     update_testimonial,
 )
 from apps.site.services.inbox_service import set_contact_read
-from apps.site.services.settings_service import update_site_settings
+from apps.site.services.settings_service import update_bunny_settings, update_site_settings
 
 
 class AdminSiteSettingsView(APIView):
@@ -56,6 +57,24 @@ class AdminSiteSettingsView(APIView):
         serializer.is_valid(raise_exception=True)
         settings = update_site_settings(fields=serializer.validated_data)
         output = AdminSiteSettingsSerializer(settings)
+        return Response({"data": output.data, "meta": {}})
+
+
+class AdminBunnySettingsView(APIView):
+    permission_classes = [IsStaffUser]
+
+    @extend_schema(tags=["Admin — Site"])
+    def get(self, request):
+        settings = get_site_settings()
+        serializer = AdminBunnySettingsSerializer(settings)
+        return Response({"data": serializer.data, "meta": {}})
+
+    @extend_schema(tags=["Admin — Site"], request=AdminBunnySettingsSerializer)
+    def patch(self, request):
+        serializer = AdminBunnySettingsSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        settings = update_bunny_settings(fields=serializer.validated_data)
+        output = AdminBunnySettingsSerializer(settings)
         return Response({"data": output.data, "meta": {}})
 
 

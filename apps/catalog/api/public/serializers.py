@@ -62,12 +62,14 @@ class PublicCourseListSerializer(serializers.ModelSerializer):
 class PublicCourseDetailSerializer(PublicCourseListSerializer):
     meta_title = serializers.SerializerMethodField()
     meta_description = serializers.SerializerMethodField()
+    modules = serializers.SerializerMethodField()
 
     class Meta(PublicCourseListSerializer.Meta):
         fields = PublicCourseListSerializer.Meta.fields + (
             "meta_title",
             "meta_description",
             "status",
+            "modules",
         )
 
     def get_meta_title(self, obj) -> str:
@@ -75,6 +77,16 @@ class PublicCourseDetailSerializer(PublicCourseListSerializer):
 
     def get_meta_description(self, obj) -> str:
         return get_active_translation(obj, "meta_description")
+
+    def get_modules(self, obj) -> list:
+        from apps.content.api.me.serializers import PublicCurriculumModuleSerializer
+        from apps.content.selectors import public_modules_for_course
+
+        translations = getattr(obj, "active_translations", None)
+        if not translations:
+            return []
+        modules = public_modules_for_course(course=obj, language=translations[0].language)
+        return PublicCurriculumModuleSerializer(modules, many=True).data
 
 
 class PublicRecipeListSerializer(serializers.ModelSerializer):
@@ -115,12 +127,14 @@ class PublicRecipeListSerializer(serializers.ModelSerializer):
 class PublicRecipeDetailSerializer(PublicRecipeListSerializer):
     meta_title = serializers.SerializerMethodField()
     meta_description = serializers.SerializerMethodField()
+    has_video = serializers.SerializerMethodField()
 
     class Meta(PublicRecipeListSerializer.Meta):
         fields = PublicRecipeListSerializer.Meta.fields + (
             "meta_title",
             "meta_description",
             "status",
+            "has_video",
         )
 
     def get_meta_title(self, obj) -> str:
@@ -128,3 +142,6 @@ class PublicRecipeDetailSerializer(PublicRecipeListSerializer):
 
     def get_meta_description(self, obj) -> str:
         return get_active_translation(obj, "meta_description")
+
+    def get_has_video(self, obj) -> bool:
+        return bool(obj.bunny_video_id)

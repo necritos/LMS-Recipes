@@ -94,6 +94,7 @@ También en `POST` multipart junto con campos JSON (`translations` como string).
 | `status` | `draft` \| `published` | Solo `published` en catálogo público |
 | `sort_order` | int | Orden en listados |
 | `cover_image` | file | Imagen de portada |
+| `bunny_video_id` | string | GUID de Bunny Stream (opcional; no se expone en público) |
 | `translations` | array | Al menos una traducción |
 
 ## Catálogo público

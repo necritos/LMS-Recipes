@@ -200,6 +200,33 @@ class AdminSiteSettingsSerializer(JSONTranslationsMixin, serializers.ModelSerial
         return data
 
 
+class AdminBunnySettingsSerializer(serializers.ModelSerializer):
+    bunny_configured = serializers.SerializerMethodField()
+    bunny_api_configured = serializers.SerializerMethodField()
+    bunny_api_key = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    bunny_token_key = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = SiteSettings
+        fields = (
+            "bunny_enabled",
+            "bunny_library_id",
+            "bunny_cdn_hostname",
+            "bunny_token_ttl_seconds",
+            "bunny_configured",
+            "bunny_api_configured",
+            "bunny_api_key",
+            "bunny_token_key",
+        )
+        read_only_fields = ("bunny_configured", "bunny_api_configured")
+
+    def get_bunny_configured(self, obj) -> bool:
+        return bool(obj.bunny_library_id.strip()) and bool(obj.bunny_token_key.strip())
+
+    def get_bunny_api_configured(self, obj) -> bool:
+        return bool(obj.bunny_api_key.strip())
+
+
 class AdminSliderTranslationSerializer(serializers.ModelSerializer):
     language_code = serializers.CharField(source="language.code", read_only=True)
 

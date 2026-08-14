@@ -239,9 +239,9 @@ Prefijo base: `/api/v1/`
 |---------|-----------|----------|
 | `/api/v1/public/` | Visitantes | Catálogo, detalle curso/receta, idiomas, home, contacto, newsletter |
 | `/api/v1/auth/` | Registro/login | login, register, Google OAuth, reset password |
-| `/api/v1/me/` | Usuario autenticado | Mis cursos, mis recetas, carrito, perfil |
+| `/api/v1/me/` | Usuario autenticado | Lecciones/video firmado, (Fase 4: carrito, compras) |
 | `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe, confirmar pago |
-| `/api/v1/admin/` | Staff | CRUD catálogo, CMS sitio, Firebase, usuarios, dashboard |
+| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, usuarios, dashboard |
 | `/api/v1/webhooks/stripe/` | Stripe | Eventos de pago |
 
 ### Contrato de respuesta (heredado de BEDERR)
@@ -273,7 +273,7 @@ Prefijo base: `/api/v1/`
 | 1 — Autenticación | 2 | ✅ Completada |
 | 2 — Catálogo | 3 | ✅ Completada |
 | 2.5 — Sitio / Firebase / contacto | 3 | ✅ Completada |
-| 3 — Contenido y video | 4 | ⬜ Pendiente |
+| 3 — Contenido y video | 4 | ✅ Completada |
 | 4 — E-commerce | 5 | ⬜ Pendiente |
 | 5 — APIs usuario | 6 | ⬜ Pendiente |
 | 6 — Admin y analytics | 7 | ⬜ Pendiente |
@@ -422,27 +422,28 @@ Prefijo base: `/api/v1/`
 
 #### Checklist
 
-- [ ] Crear app `content`
-- [ ] Modelo `Module` (pertenece a Course, orden)
-- [ ] Modelo `Lesson` (pertenece a Module, `bunny_video_id`, orden)
-- [ ] Asociar video único a `Recipe` (`bunny_video_id`)
-- [ ] Servicio `VideoAccessService` con tokens firmados y expiración
-- [ ] Integración API Bunny.net (library ID, API key en env)
-- [ ] API `GET /api/v1/me/courses/{id}/lessons/` con URL de video
-- [ ] API `GET /api/v1/me/recipes/{id}/video/` con URL de video
-- [ ] Permiso `HasActiveAccess`: verificar Purchase/AccessGrant activo
-- [ ] Respuesta 403 si acceso expirado o inexistente
-- [ ] Admin: asociar/editar `bunny_video_id` en lecciones
-- [ ] Admin: asociar/editar `bunny_video_id` en recetas
-- [ ] Tests de acceso autorizado vs denegado y expiración de token
+- [x] Crear app `content`
+- [x] Modelo `Module` (pertenece a Course, orden; título por idioma)
+- [x] Modelo `Lesson` (pertenece a Module, `bunny_video_id`, orden; título por idioma)
+- [x] Asociar video único a `Recipe` (`bunny_video_id`)
+- [x] Servicio de URLs firmadas Bunny con TTL (`sign_bunny_video` + `VideoAccessToken`)
+- [x] Credenciales Bunny.net vía admin `GET/PATCH /admin/site/bunny/` (como Firebase; no en env)
+- [x] API `GET /api/v1/me/courses/{id}/lessons/` con URL de video
+- [x] API `GET /api/v1/me/recipes/{id}/video/` con URL de video
+- [x] Permiso `HasActiveAccess`: verificar `AccessGrant` activo *(modelo adelantado desde Fase 4)*
+- [x] Respuesta 403 si acceso expirado (`ACCESS_EXPIRED`) o inexistente (`ACCESS_DENIED`)
+- [x] Admin: módulos/lecciones y `bunny_video_id` en lecciones
+- [x] Admin: asociar/editar `bunny_video_id` en recetas
+- [x] Tests de acceso autorizado vs denegado y expiración de token
 
 #### Criterio de aceptación
 
-- [ ] API devuelve URL firmada de video si el usuario tiene acceso activo
-- [ ] API responde 403 si no hay acceso o está expirado
-- [ ] URL de video expira tras el TTL configurado
+- [x] API devuelve URL firmada de video si el usuario tiene acceso activo
+- [x] API responde 403 si no hay acceso o está expirado
+- [x] URL de video expira tras el TTL configurado en admin
+- [x] GET de Bunny no expone `bunny_api_key` ni `bunny_token_key`
 
-**Fase completada:** ⬜
+**Fase completada:** ✅
 
 ---
 
@@ -454,7 +455,7 @@ Prefijo base: `/api/v1/`
 
 - [ ] Crear app `commerce`
 - [ ] Modelos `Cart`, `CartItem`, `Order`, `OrderItem`
-- [ ] Modelos `Purchase` y `AccessGrant` con `expires_at`
+- [ ] Modelos `Purchase` y `AccessGrant` con `expires_at` *(AccessGrant implementado en Fase 3; Stripe creará filas aquí)*
 - [ ] API carrito: `GET/POST/PATCH/DELETE /api/v1/me/cart/`
 - [ ] Servicio `CheckoutService.create_stripe_session()`
 - [ ] Endpoint `POST /api/v1/checkout/create-session/`
@@ -565,7 +566,7 @@ Prefijo base: `/api/v1/`
 - [ ] Webhook Stripe apuntando a URL pública de producción
 - [ ] Stripe en modo live (o test según acuerdo con cliente)
 - [ ] Email transaccional producción (SendGrid/Resend)
-- [ ] Bunny.net configurado con credenciales de producción
+- [ ] Bunny.net configurado con credenciales de producción *(API admin `/admin/site/bunny/`, Fase 3)*
 
 **QA y cierre (solo API — vía pytest y requests manuales)**
 

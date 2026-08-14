@@ -9,4 +9,6 @@ urlpatterns = [
     path("admin/", include("apps.accounts.api.admin.urls")),
     path("admin/", include("apps.catalog.api.admin.urls")),
     path("admin/", include("apps.site.api.admin.urls")),
+    path("admin/", include("apps.content.api.admin.urls")),
+    path("me/", include("apps.content.api.me.urls")),
 ]

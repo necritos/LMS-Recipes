@@ -5,6 +5,8 @@ Auth: JWT staff.
 
 Configura textos de home, redes, teléfonos y **dónde se guardan las imágenes**.
 
+Video (Bunny.net): [bunny.md](./bunny.md) — `GET/PATCH /site/bunny/`.
+
 ## Prioridad de storage
 
 1. **Firebase Storage** si `firebase_enabled=true` y hay credenciales válidas (configurado aquí).

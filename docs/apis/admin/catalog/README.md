@@ -12,6 +12,7 @@ CRUD de idiomas, categorías, cursos y recetas. Requiere JWT `type=staff`.
 | **Categorías** | [categories.md](./categories.md) | `GET/POST /categories/`, `GET/PATCH/DELETE /categories/{slug}/` |
 | **Cursos** | [courses.md](./courses.md) | `GET/POST /courses/`, `GET/PATCH/DELETE /courses/{slug}/` |
 | **Recetas** | [recipes.md](./recipes.md) | `GET/POST /recipes/`, `GET/PATCH/DELETE /recipes/{slug}/` |
+| **Módulos / lecciones** | [../content.md](../content.md) | `/courses/{slug}/modules/`, `/modules/{id}/lessons/` |
 
 ## Resumen multi-idioma
 

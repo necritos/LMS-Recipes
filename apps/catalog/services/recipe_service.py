@@ -52,6 +52,7 @@ def create_recipe(
     status: str = PublishStatus.DRAFT,
     sort_order: int = 0,
     cover_image=None,
+    bunny_video_id: str = "",
 ) -> Recipe:
     _validate_recipe_access(access_type=access_type, access_days=access_days)
     if Recipe.objects.filter(slug=slug).exists():
@@ -69,6 +70,7 @@ def create_recipe(
         category_id=category_id,
         status=status,
         sort_order=sort_order,
+        bunny_video_id=(bunny_video_id or "").strip(),
     )
     if cover_image is not None:
         recipe.cover_image = cover_image
@@ -81,6 +83,8 @@ def create_recipe(
 def update_recipe(*, recipe: Recipe, **fields) -> Recipe:
     translations = fields.pop("translations", None)
     cover_image = fields.pop("cover_image", None)
+    if "bunny_video_id" in fields and fields["bunny_video_id"] is not None:
+        fields["bunny_video_id"] = (fields["bunny_video_id"] or "").strip()
 
     access_type = fields.get("access_type", recipe.access_type)
     access_days = fields.get("access_days", recipe.access_days)

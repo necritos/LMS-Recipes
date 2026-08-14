@@ -27,6 +27,13 @@ class SiteSettings(UUIDModel, TimeStampedModel):
     firebase_bucket = models.CharField(max_length=255, blank=True)
     firebase_credentials_json = models.TextField(blank=True)
 
+    bunny_enabled = models.BooleanField(default=False)
+    bunny_library_id = models.CharField(max_length=64, blank=True)
+    bunny_cdn_hostname = models.CharField(max_length=255, blank=True)
+    bunny_api_key = models.TextField(blank=True)
+    bunny_token_key = models.TextField(blank=True)
+    bunny_token_ttl_seconds = models.PositiveIntegerField(default=3600)
+
     class Meta:
         verbose_name = "site settings"
         verbose_name_plural = "site settings"

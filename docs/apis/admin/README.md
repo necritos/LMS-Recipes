@@ -23,7 +23,14 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 
 | Documento | Descripción |
 |-----------|-------------|
-| [site/README.md](./site/README.md) | Índice CMS, Firebase, contacto, newsletter |
+| [site/README.md](./site/README.md) | Índice CMS, Firebase, Bunny, contacto, newsletter |
+
+## Contenido y video
+
+| Documento | Descripción |
+|-----------|-------------|
+| [content.md](./content.md) | Módulos, lecciones y `bunny_video_id` |
+| [site/bunny.md](./site/bunny.md) | Credenciales Bunny.net (admin, no env) |
 
 ## Usuarios
 

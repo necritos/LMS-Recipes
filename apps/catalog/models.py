@@ -144,6 +144,7 @@ class Recipe(UUIDModel, TimeStampedModel):
     )
     access_days = models.PositiveIntegerField(null=True, blank=True)
     cover_image = models.ImageField(upload_to=cover_upload_path, blank=True)
+    bunny_video_id = models.CharField(max_length=120, blank=True)
     status = models.CharField(
         max_length=20,
         choices=PublishStatus.choices,

@@ -12,6 +12,8 @@ Detalle de un curso publicado.
 
 Incluye campos SEO: `meta_title`, `meta_description`.
 
+`modules` lista el temario (títulos por `?lang=`) **sin** IDs de video. Las URLs firmadas están en [`GET /me/courses/{id}/lessons/`](../me/content.md).
+
 ## Errores
 
 | HTTP | code | Cuándo |

@@ -81,8 +81,9 @@ Google OAuth: flujo authorization code → crear/vincular `UserAccount`.
 - Metadata en session: `user_id`, `cart_item_ids`
 
 ### Bunny.net Stream
+- Credenciales (library ID, API key, token key, CDN hostname, TTL) se configuran en admin: `GET/PATCH /api/v1/admin/site/bunny/` — nunca en `.env`
 - Admin registra `bunny_video_id` por lección/receta vía API admin
-- Backend genera signed URL con expiración corta (1–4 horas)
+- Backend genera signed URL con expiración corta (1–4 horas, TTL configurable)
 - La API devuelve `signed_video_url` en JSON; el **frontend externo** renderiza el player
 
 ### Digital Ocean Spaces

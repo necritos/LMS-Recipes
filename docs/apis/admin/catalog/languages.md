@@ -46,6 +46,8 @@ Categorías, cursos, recetas y textos del home (`site`) tienen tablas hijas de t
 | Slider | `HomeSliderTranslation` | `title`, `text`, `link`, `link_text` |
 | Por dónde empezar | `StartButtonTranslation` | `title`, `link`, `link_text` |
 | Referencias | `TestimonialTranslation` | `name`, `comment` |
+| Módulo | `ModuleTranslation` | `title` |
+| Lección | `LessonTranslation` | `title` |
 
 Cada traducción enlaza `(entidad, language)` de forma única: un curso puede tener una fila para `es` y otra para `en`, pero no dos filas en el mismo idioma.
 

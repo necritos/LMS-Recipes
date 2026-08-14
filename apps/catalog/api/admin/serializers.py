@@ -140,6 +140,7 @@ class AdminRecipeSerializer(serializers.ModelSerializer):
             "status",
             "sort_order",
             "cover_image_url",
+            "bunny_video_id",
             "translations",
             "created_at",
             "updated_at",
@@ -164,4 +165,5 @@ class AdminRecipeWriteSerializer(JSONTranslationsMixin, serializers.Serializer):
     status = serializers.ChoiceField(choices=["draft", "published"], default="draft")
     sort_order = serializers.IntegerField(min_value=0, default=0)
     cover_image = serializers.ImageField(required=False, allow_null=True)
+    bunny_video_id = serializers.CharField(required=False, allow_blank=True, default="")
     translations = serializers.ListField(child=TranslationInputSerializer())

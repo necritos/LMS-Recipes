@@ -47,6 +47,6 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ("slug", "price", "status", "access_type", "access_days")
+    list_display = ("slug", "price", "status", "access_type", "access_days", "bunny_video_id")
     list_filter = ("status", "access_type")
     inlines = [RecipeTranslationInline]

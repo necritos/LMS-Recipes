@@ -65,3 +65,45 @@ def update_site_settings(*, fields: dict) -> SiteSettings:
         upsert_settings_translations(settings=settings, translations=translations)
     invalidate_media_storage_cache()
     return settings
+
+
+@transaction.atomic
+def update_bunny_settings(*, fields: dict) -> SiteSettings:
+    settings = get_site_settings()
+    for secret in ("bunny_api_key", "bunny_token_key"):
+        if fields.get(secret) == "":
+            fields[secret] = getattr(settings, secret)
+
+    enabled = fields.get("bunny_enabled", settings.bunny_enabled)
+    library_id = fields.get("bunny_library_id", settings.bunny_library_id)
+    token_key = (
+        fields["bunny_token_key"] if "bunny_token_key" in fields else settings.bunny_token_key
+    )
+    if enabled:
+        if not (library_id or "").strip() or not (token_key or "").strip():
+            raise BusinessError(
+                "BUNNY_CONFIG_INCOMPLETE",
+                "Para activar Bunny.net necesitas library_id y token_key.",
+                http_status=422,
+            )
+
+    if "bunny_cdn_hostname" in fields:
+        fields["bunny_cdn_hostname"] = _normalize_bunny_hostname(fields["bunny_cdn_hostname"] or "")
+
+    ttl = fields.get("bunny_token_ttl_seconds", settings.bunny_token_ttl_seconds)
+    if ttl is not None and not (60 <= int(ttl) <= 14400):
+        raise BusinessError(
+            "BUNNY_TTL_INVALID",
+            "El TTL del token debe estar entre 60 y 14400 segundos (1 min – 4 h).",
+            http_status=422,
+        )
+
+    for key, value in fields.items():
+        setattr(settings, key, value)
+    settings.save()
+    return settings
+
+
+def _normalize_bunny_hostname(value: str) -> str:
+    raw = value.strip().removeprefix("https://").removeprefix("http://")
+    return raw.split("/")[0].strip()
