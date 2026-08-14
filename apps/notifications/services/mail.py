@@ -10,6 +10,10 @@ def is_mail_configured() -> bool:
     backend = settings.EMAIL_BACKEND
     if "console" in backend or "locmem" in backend:
         return True
+    from apps.site.services.mailchimp_service import transactional_configured
+
+    if transactional_configured():
+        return True
     return bool(settings.EMAIL_HOST and settings.DEFAULT_FROM_EMAIL)
 
 
@@ -21,6 +25,19 @@ def send_email(
     html: str | None = None,
     from_email: str | None = None,
 ) -> dict:
+    from apps.site.services.mailchimp_service import (
+        send_transactional_via_mailchimp,
+        transactional_configured,
+    )
+
+    if transactional_configured():
+        return send_transactional_via_mailchimp(
+            to=to,
+            subject=subject,
+            text=text,
+            html=html,
+            from_email=from_email,
+        )
     sender = from_email or settings.DEFAULT_FROM_EMAIL
     message = EmailMultiAlternatives(subject=subject, body=text, from_email=sender, to=[to])
     if html:

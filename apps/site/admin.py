@@ -41,6 +41,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         "firebase_enabled",
         "bunny_enabled",
         "stripe_enabled",
+        "mailchimp_enabled",
         "contact_email",
         "updated_at",
     )
@@ -51,6 +52,8 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         "bunny_token_key",
         "stripe_secret_key",
         "stripe_webhook_secret",
+        "mailchimp_api_key",
+        "mailchimp_transactional_api_key",
     )
 
 
@@ -80,5 +83,14 @@ class ContactMessageAdmin(admin.ModelAdmin):
 
 @admin.register(NewsletterSubscriber)
 class NewsletterSubscriberAdmin(admin.ModelAdmin):
-    list_display = ("email", "created_at")
-    search_fields = ("email",)
+    list_display = (
+        "email",
+        "name",
+        "language",
+        "mailchimp_status",
+        "mailchimp_audience_name",
+        "mailchimp_group",
+        "created_at",
+    )
+    search_fields = ("email", "name")
+    list_filter = ("mailchimp_status", "language", "consent")

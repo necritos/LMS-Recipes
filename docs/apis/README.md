@@ -28,7 +28,9 @@ https://api.tudominio.com/api/v1/ # producción
 | Auth header | `Authorization: Bearer <access_token>` |
 | OpenAPI / Swagger | `/api/docs/` y `/api/schema/` |
 
-**Integraciones (Firebase, Bunny, Stripe):** [configurar-integraciones.md](../configurar-integraciones.md) — qué activar en cada dashboard y qué `PATCH` pegar en admin.
+**Integraciones (Firebase, Bunny, Stripe, Mailchimp):** [configurar-integraciones.md](../configurar-integraciones.md) — qué activar en cada dashboard y qué `PATCH` pegar en admin.
+
+Newsletter (frontend): [frontend-newsletter.md](../frontend-newsletter.md).
 
 ## JWT — tipos de token
 

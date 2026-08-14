@@ -131,7 +131,16 @@ class ContactCreateSerializer(serializers.Serializer):
 
 
 class NewsletterSubscribeSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=200)
     email = serializers.EmailField()
+    language = serializers.CharField(max_length=10)
+    consent = serializers.BooleanField()
+    tags = serializers.ListField(
+        child=serializers.CharField(max_length=40),
+        required=False,
+        default=list,
+        max_length=10,
+    )
 
 
 class AdminAboutTranslationSerializer(serializers.ModelSerializer):
@@ -258,6 +267,56 @@ class AdminStripeSettingsSerializer(serializers.ModelSerializer):
 
     def get_stripe_webhook_configured(self, obj) -> bool:
         return bool(obj.stripe_webhook_secret.strip())
+
+
+class AdminMailchimpSettingsSerializer(serializers.ModelSerializer):
+    mailchimp_configured = serializers.SerializerMethodField()
+    mailchimp_transactional_configured = serializers.SerializerMethodField()
+    mailchimp_server_prefix = serializers.SerializerMethodField()
+    mailchimp_api_key = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    mailchimp_transactional_api_key = serializers.CharField(
+        write_only=True, required=False, allow_blank=True
+    )
+    mailchimp_from_email = serializers.EmailField(required=False, allow_blank=True)
+
+    class Meta:
+        model = SiteSettings
+        fields = (
+            "mailchimp_enabled",
+            "mailchimp_audience_id",
+            "mailchimp_audience_name",
+            "mailchimp_language_category_id",
+            "mailchimp_interest_es_id",
+            "mailchimp_interest_sk_id",
+            "mailchimp_web_tag_es",
+            "mailchimp_web_tag_sk",
+            "mailchimp_double_opt_in",
+            "mailchimp_marketing_permission_ids",
+            "mailchimp_from_email",
+            "mailchimp_from_name",
+            "mailchimp_configured",
+            "mailchimp_transactional_configured",
+            "mailchimp_server_prefix",
+            "mailchimp_api_key",
+            "mailchimp_transactional_api_key",
+        )
+        read_only_fields = (
+            "mailchimp_configured",
+            "mailchimp_transactional_configured",
+            "mailchimp_server_prefix",
+        )
+
+    def get_mailchimp_configured(self, obj) -> bool:
+        return bool(obj.mailchimp_api_key.strip()) and bool(obj.mailchimp_audience_id.strip())
+
+    def get_mailchimp_transactional_configured(self, obj) -> bool:
+        return bool(obj.mailchimp_transactional_api_key.strip())
+
+    def get_mailchimp_server_prefix(self, obj) -> str:
+        key = (obj.mailchimp_api_key or "").strip()
+        if "-" not in key:
+            return ""
+        return key.rsplit("-", 1)[-1].strip().lower()
 
 
 class AdminSliderTranslationSerializer(serializers.ModelSerializer):
@@ -423,7 +482,49 @@ class AdminContactReadSerializer(serializers.Serializer):
 
 
 class AdminNewsletterSerializer(serializers.ModelSerializer):
+    mailchimp_synced = serializers.SerializerMethodField()
+    mailchimp_destination = serializers.SerializerMethodField()
+    tags = serializers.ListField(source="extra_tags", read_only=True)
+
     class Meta:
         model = NewsletterSubscriber
-        fields = ("id", "email", "created_at")
+        fields = (
+            "id",
+            "email",
+            "name",
+            "language",
+            "consent",
+            "consented_at",
+            "tags",
+            "mailchimp_synced",
+            "mailchimp_status",
+            "mailchimp_synced_at",
+            "mailchimp_audience_id",
+            "mailchimp_audience_name",
+            "mailchimp_group",
+            "mailchimp_tags",
+            "mailchimp_destination",
+            "mailchimp_error",
+            "created_at",
+        )
         read_only_fields = fields
+
+    def get_mailchimp_synced(self, obj) -> bool:
+        return obj.mailchimp_status == NewsletterSubscriber.MailchimpStatus.SYNCED
+
+    def get_mailchimp_destination(self, obj) -> str:
+        if obj.mailchimp_status == NewsletterSubscriber.MailchimpStatus.SKIPPED:
+            return ""
+        parts = []
+        audience = obj.mailchimp_audience_name or obj.mailchimp_audience_id
+        if audience:
+            if obj.mailchimp_audience_id and obj.mailchimp_audience_name:
+                parts.append(f"{obj.mailchimp_audience_name} ({obj.mailchimp_audience_id})")
+            else:
+                parts.append(audience)
+        if obj.mailchimp_group:
+            parts.append(f"Idioma: {obj.mailchimp_group}")
+        tags = obj.mailchimp_tags or []
+        if tags:
+            parts.append("tags: " + ", ".join(tags))
+        return " · ".join(parts)

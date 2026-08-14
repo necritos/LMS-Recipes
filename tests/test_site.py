@@ -233,14 +233,24 @@ class TestContactAndNewsletter:
     def test_newsletter_subscribe_and_duplicate(self, api_client, staff_client):
         first = api_client.post(
             "/api/v1/public/newsletter/",
-            {"email": "news@example.com"},
+            {
+                "name": "News",
+                "email": "news@example.com",
+                "language": "es",
+                "consent": True,
+            },
             format="json",
         )
         assert first.status_code == 201
 
         duplicate = api_client.post(
             "/api/v1/public/newsletter/",
-            {"email": "news@example.com"},
+            {
+                "name": "News",
+                "email": "news@example.com",
+                "language": "es",
+                "consent": True,
+            },
             format="json",
         )
         assert duplicate.status_code == 409

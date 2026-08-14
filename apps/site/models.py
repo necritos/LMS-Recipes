@@ -43,6 +43,21 @@ class SiteSettings(UUIDModel, TimeStampedModel):
     stripe_cancel_url = models.CharField(max_length=500, blank=True)
     stripe_currency = models.CharField(max_length=3, default="eur")
 
+    mailchimp_enabled = models.BooleanField(default=False)
+    mailchimp_api_key = models.TextField(blank=True)
+    mailchimp_audience_id = models.CharField(max_length=32, blank=True)
+    mailchimp_audience_name = models.CharField(max_length=120, blank=True)
+    mailchimp_language_category_id = models.CharField(max_length=64, blank=True)
+    mailchimp_interest_es_id = models.CharField(max_length=64, blank=True)
+    mailchimp_interest_sk_id = models.CharField(max_length=64, blank=True)
+    mailchimp_web_tag_es = models.CharField(max_length=40, default="WEB_ES")
+    mailchimp_web_tag_sk = models.CharField(max_length=40, default="WEB_SK")
+    mailchimp_double_opt_in = models.BooleanField(default=False)
+    mailchimp_marketing_permission_ids = models.CharField(max_length=500, blank=True)
+    mailchimp_transactional_api_key = models.TextField(blank=True)
+    mailchimp_from_email = models.EmailField(blank=True)
+    mailchimp_from_name = models.CharField(max_length=120, blank=True)
+
     class Meta:
         verbose_name = "site settings"
         verbose_name_plural = "site settings"
@@ -207,7 +222,29 @@ class ContactMessage(UUIDModel, TimeStampedModel):
 
 
 class NewsletterSubscriber(UUIDModel, TimeStampedModel):
+    class MailchimpStatus(models.TextChoices):
+        PENDING = "pending", "Pendiente"
+        SYNCED = "synced", "Sincronizado"
+        FAILED = "failed", "Error"
+        SKIPPED = "skipped", "Omitido"
+
     email = models.EmailField(unique=True)
+    name = models.CharField(max_length=200, blank=True)
+    language = models.CharField(max_length=10, blank=True)
+    consent = models.BooleanField(default=False)
+    consented_at = models.DateTimeField(null=True, blank=True)
+    extra_tags = models.JSONField(default=list, blank=True)
+    mailchimp_status = models.CharField(
+        max_length=16,
+        choices=MailchimpStatus.choices,
+        default=MailchimpStatus.SKIPPED,
+    )
+    mailchimp_synced_at = models.DateTimeField(null=True, blank=True)
+    mailchimp_audience_id = models.CharField(max_length=32, blank=True)
+    mailchimp_audience_name = models.CharField(max_length=120, blank=True)
+    mailchimp_group = models.CharField(max_length=80, blank=True)
+    mailchimp_tags = models.JSONField(default=list, blank=True)
+    mailchimp_error = models.TextField(blank=True)
 
     class Meta:
         ordering = ["-created_at"]

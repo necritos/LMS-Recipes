@@ -1,5 +1,6 @@
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +10,7 @@ from apps.site.api.serializers import (
     AdminBunnySettingsSerializer,
     AdminContactMessageSerializer,
     AdminContactReadSerializer,
+    AdminMailchimpSettingsSerializer,
     AdminNewsletterSerializer,
     AdminSiteSettingsSerializer,
     AdminSliderSerializer,
@@ -40,8 +42,14 @@ from apps.site.services.content_service import (
     update_testimonial,
 )
 from apps.site.services.inbox_service import set_contact_read
+from apps.site.services.mailchimp_service import (
+    delete_newsletter_subscriber,
+    list_interest_categories,
+    upsert_newsletter_member,
+)
 from apps.site.services.settings_service import (
     update_bunny_settings,
+    update_mailchimp_settings,
     update_site_settings,
     update_stripe_settings,
 )
@@ -99,6 +107,33 @@ class AdminStripeSettingsView(APIView):
         settings = update_stripe_settings(fields=serializer.validated_data)
         output = AdminStripeSettingsSerializer(settings)
         return Response({"data": output.data, "meta": {}})
+
+
+class AdminMailchimpSettingsView(APIView):
+    permission_classes = [IsStaffUser]
+
+    @extend_schema(tags=["Admin — Site"])
+    def get(self, request):
+        settings = get_site_settings()
+        serializer = AdminMailchimpSettingsSerializer(settings)
+        return Response({"data": serializer.data, "meta": {}})
+
+    @extend_schema(tags=["Admin — Site"], request=AdminMailchimpSettingsSerializer)
+    def patch(self, request):
+        serializer = AdminMailchimpSettingsSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        settings = update_mailchimp_settings(fields=serializer.validated_data)
+        output = AdminMailchimpSettingsSerializer(settings)
+        return Response({"data": output.data, "meta": {}})
+
+
+class AdminMailchimpInterestsView(APIView):
+    permission_classes = [IsStaffUser]
+
+    @extend_schema(tags=["Admin — Site"])
+    def get(self, request):
+        categories = list_interest_categories()
+        return Response({"data": {"categories": categories}, "meta": {}})
 
 
 @extend_schema_view(
@@ -246,7 +281,14 @@ class AdminContactMessageViewSet(
 @extend_schema_view(
     list=extend_schema(
         tags=["Admin — Site"],
-        parameters=[OpenApiParameter("search", str, description="Filtrar por email")],
+        parameters=[
+            OpenApiParameter("search", str, description="Filtrar por email o nombre"),
+            OpenApiParameter(
+                "mailchimp_status",
+                str,
+                description="pending, synced, failed o skipped",
+            ),
+        ],
     ),
     retrieve=extend_schema(tags=["Admin — Site"]),
     destroy=extend_schema(tags=["Admin — Site"]),
@@ -263,4 +305,15 @@ class AdminNewsletterViewSet(
 
     def get_queryset(self):
         search = self.request.query_params.get("search", "").strip()
-        return admin_newsletter_subscribers(search=search)
+        mailchimp_status = self.request.query_params.get("mailchimp_status", "").strip()
+        return admin_newsletter_subscribers(search=search, mailchimp_status=mailchimp_status)
+
+    def perform_destroy(self, instance):
+        delete_newsletter_subscriber(subscriber=instance)
+
+    @extend_schema(tags=["Admin — Site"])
+    @action(detail=True, methods=["post"], url_path="resync")
+    def resync(self, request, pk=None):
+        subscriber = upsert_newsletter_member(subscriber=self.get_object())
+        output = AdminNewsletterSerializer(subscriber)
+        return Response({"data": output.data, "meta": {}})

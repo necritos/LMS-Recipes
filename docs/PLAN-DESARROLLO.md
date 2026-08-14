@@ -46,7 +46,7 @@ Ver sección 9. En resumen: landing page, diseño responsive, reproductor embebi
 | Storage prod | Firebase Storage (admin) / DO Spaces fallback | Imágenes públicas |
 | Video hosting | Bunny.net Stream | URLs firmadas, sin descarga |
 | Pagos | Stripe | Checkout + webhooks |
-| Email | SendGrid o Resend | Transaccional |
+| Email | Mailchimp | Marketing API (newsletter) + Transactional/Mandrill (bienvenida, reset, compra). Config en admin |
 | Servidor prod | Gunicorn + WhiteNoise | App Platform o Droplet |
 | Calidad | Ruff + pytest | Igual que BEDERR |
 | CI/CD | GitHub Actions | Tests + deploy a DO |
@@ -74,7 +74,7 @@ flowchart TB
     subgraph External
         Bunny[Bunny.net Stream]
         Google[Google OAuth]
-        Email[SendGrid / Resend]
+        Email[Mailchimp]
     end
 
     FE -->|REST JSON| LB --> API
@@ -117,11 +117,12 @@ CELERY_RESULT_BACKEND=rediss://...
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
-# Stripe, Bunny.net y Firebase: credenciales en admin (nunca en .env)
+# Stripe, Bunny.net, Firebase y Mailchimp: credenciales en admin (nunca en .env)
 # Guía: docs/configurar-integraciones.md
 # PATCH /api/v1/admin/site/stripe/
 # PATCH /api/v1/admin/site/bunny/
 # PATCH /api/v1/admin/site/settings/
+# PATCH /api/v1/admin/site/mailchimp/
 
 # Storage (DO Spaces)
 AWS_ACCESS_KEY_ID=
@@ -130,11 +131,11 @@ AWS_STORAGE_BUCKET_NAME=
 AWS_S3_ENDPOINT_URL=https://nyc3.digitaloceanspaces.com
 AWS_S3_REGION_NAME=nyc3
 
-# Email
-EMAIL_HOST=
-EMAIL_HOST_USER=
-EMAIL_HOST_PASSWORD=
-DEFAULT_FROM_EMAIL=
+# Email: en producción se usa Mailchimp (admin). Fallback local SMTP:
+# EMAIL_HOST=
+# EMAIL_HOST_USER=
+# EMAIL_HOST_PASSWORD=
+# DEFAULT_FROM_EMAIL=
 
 # CORS (dominios del frontend externo, no desarrollado aquí)
 CORS_ALLOWED_ORIGINS=https://recetario.com
@@ -237,7 +238,7 @@ Prefijo base: `/api/v1/`
 | `/api/v1/auth/` | Registro/login | login, register, Google OAuth, reset password |
 | `/api/v1/me/` | Usuario autenticado | Carrito, compras, biblioteca, progreso, video firmado |
 | `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe Checkout |
-| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, Stripe, usuarios, dashboard |
+| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, Stripe, Mailchimp, usuarios, dashboard |
 | `/api/v1/webhooks/stripe/` | Stripe | Eventos de pago |
 
 ### Contrato de respuesta (heredado de BEDERR)
@@ -400,6 +401,7 @@ Prefijo base: `/api/v1/`
 - [x] API pública `GET /api/v1/public/site/?lang=`
 - [x] Formulario contacto `POST /api/v1/public/contact/` + inbox admin leído/no leído
 - [x] Newsletter `POST /api/v1/public/newsletter/` + listado admin
+- [x] Mailchimp Marketing: Audience + group Idioma + tags (WEB_ES/WEB_SK); config admin *(adelantado; emails transaccionales Mandrill)*
 - [x] Tests y documentación en `docs/apis/`
 
 #### Criterio de aceptación
@@ -407,6 +409,7 @@ Prefijo base: `/api/v1/`
 - [x] Admin configura Firebase y el JSON de credenciales no se expone en GET
 - [x] Home público filtra sliders, sobre mí, botones y referencias por `?lang=` (mismo sistema que el catálogo)
 - [x] Contacto se marca como leído en admin; newsletter rechaza emails duplicados
+- [x] Newsletter sincroniza a Mailchimp (Audience, group de idioma, tags) y el listado admin muestra destino
 
 **Fase completada:** ✅
 
@@ -561,8 +564,9 @@ Prefijo base: `/api/v1/`
 - [x] Variables de entorno en Droplet (`.env`: SECRET_KEY, DATABASE_URL, etc.)
 - [ ] Webhook Stripe apuntando a URL pública de producción
 - [ ] Stripe en modo live (o test según acuerdo con cliente)
-- [ ] Email transaccional producción (SendGrid/Resend)
+- [x] Email transaccional producción (Mailchimp Transactional / Mandrill vía admin `/admin/site/mailchimp/`)
 - [ ] Bunny.net configurado con credenciales de producción *(API admin `/admin/site/bunny/`, Fase 3)*
+- [x] Mailchimp newsletter (Audience Petralicious, group Idioma, tags WEB_ES/WEB_SK)
 
 **QA y cierre (solo API — vía pytest y requests manuales)**
 
@@ -640,7 +644,7 @@ Prefijo base: `/api/v1/`
 
 ## 11. Checklist pre-lanzamiento
 
-- [ ] `SECRET_KEY` en variables de entorno (nunca en repo). Keys Stripe/Bunny/Firebase solo en admin.
+- [ ] `SECRET_KEY` en variables de entorno (nunca en repo). Keys Stripe/Bunny/Firebase/Mailchimp solo en admin.
 - [ ] `DEBUG=False` en producción
 - [ ] CORS restringido a dominios del frontend externo (config only)
 - [x] Webhooks Stripe verificados con signing secret *(API admin `/admin/site/stripe/`)*
@@ -676,5 +680,6 @@ Las reglas de desarrollo para agentes y desarrolladores están en:
 - Mockups UI solo referencia visual (no desarrollo): `../RECETARIO-TEMPLATES/`
 - [Digital Ocean App Platform](https://docs.digitalocean.com/products/app-platform/)
 - [Bunny.net Stream API](https://docs.bunny.net/docs/stream)
-- Guía de integraciones (Firebase, Bunny, Stripe): [`docs/configurar-integraciones.md`](./configurar-integraciones.md)
+- Guía de integraciones (Firebase, Bunny, Stripe, Mailchimp): [`docs/configurar-integraciones.md`](./configurar-integraciones.md)
+- Newsletter frontend: [`docs/frontend-newsletter.md`](./frontend-newsletter.md)
 - [Stripe Checkout](https://stripe.com/docs/checkout)

@@ -135,7 +135,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "Public — Site", "description": "Home, contacto y newsletter"},
         {
             "name": "Admin — Site",
-            "description": "CMS del sitio, Firebase, Bunny.net, Stripe, inbox y newsletter",
+            "description": "CMS, Firebase, Bunny, Stripe, Mailchimp, inbox y newsletter",
         },
         {"name": "Admin — Content", "description": "Módulos, lecciones y video Bunny"},
         {

@@ -1,13 +1,15 @@
-# Configurar Firebase, Bunny.net y Stripe
+# Configurar Firebase, Bunny.net, Stripe y Mailchimp
 
-Las tres integraciones se activan **desde el admin** (JWT staff). Nada de keys en `.env`.
+Las integraciones se activan **desde el admin** (JWT staff). Nada de keys en `.env`.
 
 1. Login staff: `POST /api/v1/admin/auth/login/` → `access`
 2. `Authorization: Bearer <access>`
 3. `PATCH` al endpoint de cada servicio
 4. `GET` para comprobar: `*_configured: true` (los secretos **no** se devuelven)
 
-Detalle por API: [Firebase](./apis/admin/site/settings.md) · [Bunny](./apis/admin/site/bunny.md) · [Stripe](./apis/admin/site/stripe.md)
+Detalle por API: [Firebase](./apis/admin/site/settings.md) · [Bunny](./apis/admin/site/bunny.md) · [Stripe](./apis/admin/site/stripe.md) · [Mailchimp](./apis/admin/site/mailchimp.md)
+
+Formulario newsletter (frontend): [frontend-newsletter.md](./frontend-newsletter.md)
 
 ---
 
@@ -180,10 +182,124 @@ En live: mismas pantallas con Test mode OFF → `sk_live_` / `pk_live_` y `strip
 
 ---
 
+## 4. Mailchimp (newsletter + emails transaccionales)
+
+Dos productos en la misma cuenta:
+
+| Uso | Producto Mailchimp | Campo admin |
+|-----|--------------------|-------------|
+| Newsletter (Audience, groups, tags) | **Marketing API** | `mailchimp_api_key` |
+| Bienvenida, recuperación de contraseña, confirmación de compra | **Transactional** (Mandrill) | `mailchimp_transactional_api_key` |
+
+La API key **nunca** va al frontend. El formulario público llama a `POST /api/v1/public/newsletter/` y el servidor habla con Mailchimp.
+
+Audience del cliente (valores a pegar):
+
+| Campo | Valor |
+|-------|--------|
+| Audience | Petralicious |
+| Audience ID | `60e8a3969d` |
+| Group (Interest Category) | Idioma / Jazyk |
+| Interests | Español · Slovenčina |
+| Tags automáticos | `WEB_ES` (web ES) · `WEB_SK` (web SK) |
+
+### 4.1 Marketing API (newsletter)
+
+1. Entra en [Mailchimp](https://admin.mailchimp.com) → icono de perfil → **Account & billing** → **Extras → API keys** → **Create A Key**. Copia la key (termina en `-us21` o similar: ese sufijo es el datacenter).
+2. **Audience → Petralicious → Settings → Audience name and defaults**. Copia el **Audience ID** (`60e8a3969d`).
+3. En la misma Audience: **Manage contacts → Groups**. Confirma el group **Idioma / Jazyk** con **Español** y **Slovenčina**. No hace falta que el usuario elija idioma: lo envía el frontend según la web (`es` / `sk`).
+4. (Opcional, GDPR) Si la Audience tiene Marketing Permissions, copia los IDs (o déjalos vacíos: el backend intenta leerlos de un contacto existente).
+
+Guarda Marketing **antes** de pedir los IDs de grupo:
+
+```http
+PATCH /api/v1/admin/site/mailchimp/
+Authorization: Bearer <staff>
+```
+
+```json
+{
+  "mailchimp_enabled": true,
+  "mailchimp_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-us21",
+  "mailchimp_audience_id": "60e8a3969d",
+  "mailchimp_audience_name": "Petralicious",
+  "mailchimp_web_tag_es": "WEB_ES",
+  "mailchimp_web_tag_sk": "WEB_SK",
+  "mailchimp_double_opt_in": false,
+  "mailchimp_from_email": "hola@petralicious.sk",
+  "mailchimp_from_name": "Petralicious"
+}
+```
+
+`double_opt_in: false` porque el formulario ya exige consentimiento + enlace a privacidad. Si en Mailchimp la Audience tiene double opt-in obligatorio, pon `true` (Mailchimp mandará el correo de confirmación).
+
+Luego lista grupos e interests:
+
+```http
+GET /api/v1/admin/site/mailchimp/interests/
+Authorization: Bearer <staff>
+```
+
+Copia el `id` de **Idioma / Jazyk** y los de **Español** / **Slovenčina**:
+
+```http
+PATCH /api/v1/admin/site/mailchimp/
+Authorization: Bearer <staff>
+```
+
+```json
+{
+  "mailchimp_language_category_id": "xxxxxxxxxx",
+  "mailchimp_interest_es_id": "yyyyyyyyyy",
+  "mailchimp_interest_sk_id": "zzzzzzzzzz"
+}
+```
+
+Si dejas esos IDs vacíos, el backend los resuelve por nombre (`Idioma / Jazyk`, `Español`, `Slovenčina`) en cada alta. Pegarlos evita una llamada extra y es más estable.
+
+Tags futuros (`FREEBIE_ES`, `FREEBIE_SK`, `WAITLIST`, …): el frontend los manda en `tags` y el servidor los añade **además** de `WEB_ES` / `WEB_SK`. No hace falta reconfigurar admin.
+
+### 4.2 Transactional / Mandrill (correos transaccionales)
+
+Hace falta para códigos únicos de recuperación de contraseña (un journey de Marketing no sirve).
+
+1. En Mailchimp: **App → Transactional Email** (o [mandrillapp.com](https://mandrillapp.com) con la misma cuenta).
+2. **Settings → SMTP & API Info → New API Key**. Esa key es **distinta** de la Marketing.
+3. **Sending Domains**: verifica `petralicious.sk` (DKIM/SPF). El `mailchimp_from_email` debe ser de ese dominio.
+4. Pega en admin:
+
+```http
+PATCH /api/v1/admin/site/mailchimp/
+Authorization: Bearer <staff>
+```
+
+```json
+{
+  "mailchimp_transactional_api_key": "md-xxxxxxxx",
+  "mailchimp_from_email": "hola@petralicious.sk",
+  "mailchimp_from_name": "Petralicious"
+}
+```
+
+Con eso salen por Mandrill:
+
+- Bienvenida al registrarse
+- Recuperación de contraseña (código OTP)
+- Confirmación de compra (tras webhook Stripe)
+
+`GET /admin/site/mailchimp/`: `mailchimp_configured` y `mailchimp_transactional_configured`. Las keys no se leen. Si envías `""` en un PATCH posterior, se conservan.
+
+Sin Mandrill, el fallback es SMTP de `.env` (`EMAIL_HOST`, …) o consola en local.
+
+---
+
 ## Orden recomendado
 
 1. Firebase → las imágenes del CMS y del catálogo suben ya al bucket.
 2. Bunny → videos firmados en `/me/courses/{id}/lessons/` (hace falta un `AccessGrant`; en test se crea en Django admin o pagando).
 3. Stripe → carrito + checkout; el webhook crea el grant.
+4. Mailchimp Marketing → newsletter. Mailchimp Transactional → bienvenida / reset / compra.
 
-Sin webhook de Stripe el usuario paga y **no ve videos**.
+Sin webhook de Stripe el usuario paga y **no ve videos**.  
+Sin Marketing API el alta de newsletter se guarda en el admin (`mailchimp_status: skipped`) pero no llega a la Audience.  
+Sin Transactional, los correos transaccionales no salen por Mailchimp (solo SMTP/consola).

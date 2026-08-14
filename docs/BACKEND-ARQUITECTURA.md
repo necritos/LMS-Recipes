@@ -100,8 +100,9 @@ Google OAuth: flujo authorization code → crear/vincular `UserAccount`.
 
 | Task | Frecuencia | Acción |
 |------|------------|--------|
-| `send_welcome_email` | On signup | Email bienvenida |
+| `send_welcome_email` | On signup | Email bienvenida (Mailchimp Transactional / SMTP) |
 | `send_purchase_confirmation` | On webhook | Email compra |
+| `site.sync_newsletter_mailchimp` | On newsletter | Alta en Audience Mailchimp (group + tags) |
 | `expire_access_grants` | Diario (cron / beat) | Cuenta grants con `expires_at` vencido |
 | `process_stripe_webhook` | On event | Procesar pago async |
 

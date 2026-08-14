@@ -23,4 +23,4 @@ Guía multi-idioma: [../admin/catalog/languages.md](../admin/catalog/languages.m
 |----------|-----------|
 | GET `/public/site/` | [site.md](./site.md) |
 | POST `/public/contact/` | [contact.md](./contact.md) |
-| POST `/public/newsletter/` | [newsletter.md](./newsletter.md) |
+| POST `/public/newsletter/` | [newsletter.md](./newsletter.md) — guía frontend: [frontend-newsletter.md](../../frontend-newsletter.md) |

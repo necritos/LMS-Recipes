@@ -164,3 +164,52 @@ def update_stripe_settings(*, fields: dict) -> SiteSettings:
         setattr(settings, key, value)
     settings.save()
     return settings
+
+
+@transaction.atomic
+def update_mailchimp_settings(*, fields: dict) -> SiteSettings:
+    settings = get_site_settings()
+    for secret in ("mailchimp_api_key", "mailchimp_transactional_api_key"):
+        if fields.get(secret) == "":
+            fields[secret] = getattr(settings, secret)
+
+    enabled = fields.get("mailchimp_enabled", settings.mailchimp_enabled)
+    api_key = (
+        fields["mailchimp_api_key"] if "mailchimp_api_key" in fields else settings.mailchimp_api_key
+    )
+    audience_id = fields.get("mailchimp_audience_id", settings.mailchimp_audience_id)
+
+    if enabled:
+        if not (api_key or "").strip() or not (audience_id or "").strip():
+            raise BusinessError(
+                "MAILCHIMP_CONFIG_INCOMPLETE",
+                "Para activar Mailchimp necesitas API key de Marketing y Audience ID.",
+                http_status=422,
+            )
+        from apps.site.services.mailchimp_service import datacenter_from_api_key
+
+        datacenter_from_api_key(api_key)
+
+    for key in (
+        "mailchimp_audience_id",
+        "mailchimp_audience_name",
+        "mailchimp_language_category_id",
+        "mailchimp_interest_es_id",
+        "mailchimp_interest_sk_id",
+        "mailchimp_web_tag_es",
+        "mailchimp_web_tag_sk",
+        "mailchimp_from_name",
+        "mailchimp_marketing_permission_ids",
+        "mailchimp_from_email",
+    ):
+        if key in fields and isinstance(fields[key], str):
+            fields[key] = fields[key].strip()
+
+    for tag_field in ("mailchimp_web_tag_es", "mailchimp_web_tag_sk"):
+        if tag_field in fields and fields[tag_field]:
+            fields[tag_field] = fields[tag_field].strip().upper()
+
+    for key, value in fields.items():
+        setattr(settings, key, value)
+    settings.save()
+    return settings

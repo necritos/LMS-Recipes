@@ -1,4 +1,4 @@
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 
 from apps.catalog.models import Language
 from apps.site.models import (
@@ -73,8 +73,14 @@ def admin_contact_messages(*, is_read: bool | None = None) -> QuerySet[ContactMe
     return qs
 
 
-def admin_newsletter_subscribers(*, search: str = "") -> QuerySet[NewsletterSubscriber]:
+def admin_newsletter_subscribers(
+    *,
+    search: str = "",
+    mailchimp_status: str = "",
+) -> QuerySet[NewsletterSubscriber]:
     qs = NewsletterSubscriber.objects.all()
     if search:
-        qs = qs.filter(email__icontains=search)
+        qs = qs.filter(Q(email__icontains=search) | Q(name__icontains=search))
+    if mailchimp_status:
+        qs = qs.filter(mailchimp_status=mailchimp_status)
     return qs

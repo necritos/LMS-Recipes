@@ -14,4 +14,7 @@ from apps.site.services.inbox_service import (  # noqa: F401
     set_contact_read,
     subscribe_newsletter,
 )
-from apps.site.services.settings_service import update_site_settings  # noqa: F401
+from apps.site.services.settings_service import (  # noqa: F401
+    update_mailchimp_settings,
+    update_site_settings,
+)
