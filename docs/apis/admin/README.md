@@ -23,7 +23,7 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 
 | Documento | Descripción |
 |-----------|-------------|
-| [site/README.md](./site/README.md) | Índice CMS, Firebase, Bunny, Stripe, Mailchimp, contacto, newsletter |
+| [site/README.md](./site/README.md) | Índice CMS, Firebase, Bunny, Stripe, Mailchimp, Google, contacto, newsletter |
 
 ## Contenido y video
 
@@ -43,6 +43,7 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 | Documento | Descripción |
 |-----------|-------------|
 | [site/mailchimp.md](./site/mailchimp.md) | Newsletter Audience + emails transaccionales (admin, no env) |
+| [site/google.md](./site/google.md) | Google OAuth Client ID (admin, no env) |
 
 ## Dashboard
 

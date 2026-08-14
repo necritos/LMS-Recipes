@@ -58,6 +58,10 @@ class SiteSettings(UUIDModel, TimeStampedModel):
     mailchimp_from_email = models.EmailField(blank=True)
     mailchimp_from_name = models.CharField(max_length=120, blank=True)
 
+    google_oauth_enabled = models.BooleanField(default=False)
+    google_client_id = models.CharField(max_length=255, blank=True)
+    google_client_secret = models.TextField(blank=True)
+
     class Meta:
         verbose_name = "site settings"
         verbose_name_plural = "site settings"

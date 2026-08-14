@@ -187,3 +187,68 @@ class TestGoogleAuth:
         )
         assert response.status_code == 503
         assert response.json()["error"]["code"] == "GOOGLE_NOT_CONFIGURED"
+
+    def test_google_auth_uses_admin_client_id(
+        self, api_client, staff_client, settings, monkeypatch
+    ):
+        settings.GOOGLE_CLIENT_ID = "env-should-be-ignored.apps.googleusercontent.com"
+        admin_client_id = "admin-client-id.apps.googleusercontent.com"
+        patched = staff_client.patch(
+            "/api/v1/admin/site/google/",
+            {
+                "google_oauth_enabled": True,
+                "google_client_id": admin_client_id,
+                "google_client_secret": "GOCSPX-test-secret",
+            },
+            format="json",
+        )
+        assert patched.status_code == 200, patched.json()
+        assert patched.json()["data"]["google_configured"] is True
+        assert "google_client_secret" not in patched.json()["data"]
+
+        def fake_verify(token, request, audience):
+            assert audience == admin_client_id
+            return {
+                "sub": "google-admin-1",
+                "email": "admin-google@recetario.local",
+                "email_verified": True,
+                "given_name": "Ada",
+                "family_name": "Lovelace",
+            }
+
+        monkeypatch.setattr(
+            "apps.accounts.services.google_auth.id_token.verify_oauth2_token",
+            fake_verify,
+        )
+        response = api_client.post(
+            "/api/v1/auth/google/",
+            {"id_token": "token"},
+            format="json",
+        )
+        assert response.status_code == 201
+
+        public = api_client.get("/api/v1/public/google-oauth/")
+        assert public.status_code == 200
+        assert public.json()["data"]["enabled"] is True
+        assert public.json()["data"]["client_id"] == admin_client_id
+
+    def test_google_admin_requires_client_id(self, staff_client):
+        response = staff_client.patch(
+            "/api/v1/admin/site/google/",
+            {"google_oauth_enabled": True},
+            format="json",
+        )
+        assert response.status_code == 422
+        assert response.json()["error"]["code"] == "GOOGLE_CONFIG_INCOMPLETE"
+
+    def test_google_admin_rejects_bad_client_id(self, staff_client):
+        response = staff_client.patch(
+            "/api/v1/admin/site/google/",
+            {
+                "google_oauth_enabled": True,
+                "google_client_id": "not-a-google-client",
+            },
+            format="json",
+        )
+        assert response.status_code == 422
+        assert response.json()["error"]["code"] == "GOOGLE_CLIENT_ID_INVALID"

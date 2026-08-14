@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from apps.site.api.admin.views import (
     AdminBunnySettingsView,
     AdminContactMessageViewSet,
+    AdminGoogleOAuthSettingsView,
     AdminMailchimpInterestsView,
     AdminMailchimpSettingsView,
     AdminNewsletterViewSet,
@@ -31,5 +32,6 @@ urlpatterns = [
         AdminMailchimpInterestsView.as_view(),
         name="admin-site-mailchimp-interests",
     ),
+    path("site/google/", AdminGoogleOAuthSettingsView.as_view(), name="admin-site-google"),
     path("", include(router.urls)),
 ]

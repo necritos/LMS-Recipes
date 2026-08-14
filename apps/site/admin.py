@@ -42,6 +42,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         "bunny_enabled",
         "stripe_enabled",
         "mailchimp_enabled",
+        "google_oauth_enabled",
         "contact_email",
         "updated_at",
     )
@@ -54,6 +55,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         "stripe_webhook_secret",
         "mailchimp_api_key",
         "mailchimp_transactional_api_key",
+        "google_client_secret",
     )
 
 

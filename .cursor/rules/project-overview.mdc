@@ -14,7 +14,7 @@ Plataforma **LMS + E-commerce** expuesta vía Django/DRF para venta de cursos y 
 - **Local:** SQLite (default Django, sin Postgres obligatorio)
 - **Prod:** PostgreSQL 16 en Digital Ocean Managed Database
 - Celery + Redis (emails, expiración accesos, webhooks)
-- Stripe (pagos), Bunny.net Stream (URLs firmadas), Mailchimp (newsletter + emails transaccionales; config en admin)
+- Stripe (pagos), Bunny.net Stream (URLs firmadas), Mailchimp (newsletter + emails), Google OAuth (config en admin)
 - Imágenes: **Firebase Storage** (configurable en admin) → fallback DO Spaces / filesystem
 - Referencia arquitectónica: BEDERR-BACKEND (capas, servicios, envelope API)
 
@@ -38,7 +38,7 @@ Plataforma **LMS + E-commerce** expuesta vía Django/DRF para venta de cursos y 
 ## Prohibido
 - Desarrollar cualquier frontend o interfaz gráfica
 - Lógica de negocio en views/serializers (usar `services/`)
-- Hardcodear secrets o keys de Stripe/Bunny/Mailchimp
+- Hardcodear secrets o keys de Stripe/Bunny/Mailchimp/Google
 - Usar PostgreSQL en local por defecto (SQLite es el default)
 - Exponer `video_id` de Bunny sin verificar Purchase activo
 - Implementar reproductor de video, landing page o paneles visuales

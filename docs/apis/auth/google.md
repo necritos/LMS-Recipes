@@ -47,9 +47,11 @@ Igual estructura con `"created": true`.
 | 401 | `INVALID_GOOGLE_TOKEN` | Token inválido o expirado |
 | 422 | `EMAIL_NOT_VERIFIED` | Email de Google no verificado |
 | 403 | `ACCOUNT_SUSPENDED` | Cuenta suspendida |
-| 503 | `GOOGLE_NOT_CONFIGURED` | `GOOGLE_CLIENT_ID` no configurado |
+| 503 | `GOOGLE_NOT_CONFIGURED` | Google OAuth no configurado (admin ni env) |
 
 ## Notas
 
-- Requiere `GOOGLE_CLIENT_ID` en variables de entorno del backend.
+- Client ID desde admin: `GET/PATCH /api/v1/admin/site/google/` (guía: [configurar-integraciones.md](../../configurar-integraciones.md) §5).
+- El frontend puede leer `GET /api/v1/public/google-oauth/` → `{ enabled, client_id }`.
+- Fallback legacy: `GOOGLE_CLIENT_ID` en `.env` solo si `google_oauth_enabled` es `false`.
 - Si el email ya existe sin `google_id`, se vincula la cuenta.

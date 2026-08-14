@@ -17,6 +17,7 @@ from apps.site.selectors import (
     public_start_buttons,
     public_testimonials,
 )
+from apps.site.services.google_oauth_config import google_oauth_public_config
 from apps.site.services.inbox_service import create_contact_message, subscribe_newsletter
 
 
@@ -50,6 +51,14 @@ class PublicSiteView(APIView):
         }
         serializer = PublicSiteSerializer(payload, context={"request": request})
         return Response({"data": serializer.data, "meta": {}})
+
+
+class PublicGoogleOAuthConfigView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(tags=["Public — Site"])
+    def get(self, request):
+        return Response({"data": google_oauth_public_config(), "meta": {}})
 
 
 class PublicContactView(APIView):

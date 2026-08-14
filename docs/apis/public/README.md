@@ -22,5 +22,6 @@ Guía multi-idioma: [../admin/catalog/languages.md](../admin/catalog/languages.m
 | Endpoint | Documento |
 |----------|-----------|
 | GET `/public/site/` | [site.md](./site.md) |
+| GET `/public/google-oauth/` | Client ID público para el botón Google ([configurar-integraciones §5](../../configurar-integraciones.md)) |
 | POST `/public/contact/` | [contact.md](./contact.md) |
 | POST `/public/newsletter/` | [newsletter.md](./newsletter.md) — guía frontend: [frontend-newsletter.md](../../frontend-newsletter.md) |

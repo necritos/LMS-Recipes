@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from django.utils import timezone
@@ -12,7 +11,10 @@ from apps.notifications.tasks import send_welcome_email_task
 
 
 def _verify_google_id_token(*, token: str) -> dict:
-    if not settings.GOOGLE_CLIENT_ID:
+    from apps.site.services.google_oauth_config import resolve_google_client_id
+
+    client_id = resolve_google_client_id()
+    if not client_id:
         raise BusinessError(
             "GOOGLE_NOT_CONFIGURED",
             "Google OAuth no está configurado en el servidor.",
@@ -22,7 +24,7 @@ def _verify_google_id_token(*, token: str) -> dict:
         return id_token.verify_oauth2_token(
             token,
             google_requests.Request(),
-            settings.GOOGLE_CLIENT_ID,
+            client_id,
         )
     except ValueError as exc:
         raise BusinessError(

@@ -2,7 +2,7 @@
 
 JWT `type=staff`. Prefijo `/api/v1/admin/`.
 
-**Cómo obtener keys y pegarlas en admin:** [configurar-integraciones.md](../../../configurar-integraciones.md) (Firebase, Bunny, Stripe, Mailchimp).
+**Cómo obtener keys y pegarlas en admin:** [configurar-integraciones.md](../../../configurar-integraciones.md) (Firebase, Bunny, Stripe, Mailchimp, Google).
 
 | Recurso | Guía | Endpoints |
 |---------|------|-----------|
@@ -10,6 +10,7 @@ JWT `type=staff`. Prefijo `/api/v1/admin/`.
 | Bunny.net Stream | [bunny.md](./bunny.md) | `GET/PATCH /site/bunny/` |
 | Stripe (pagos) | [stripe.md](./stripe.md) | `GET/PATCH /site/stripe/` |
 | Mailchimp | [mailchimp.md](./mailchimp.md) | `GET/PATCH /site/mailchimp/`, `GET /site/mailchimp/interests/` |
+| Google OAuth | [google.md](./google.md) | `GET/PATCH /site/google/` |
 | Sliders | [sliders.md](./sliders.md) | `GET/POST /site/sliders/`, `GET/PATCH/DELETE /site/sliders/{id}/` |
 | Por dónde empezar | [start-buttons.md](./start-buttons.md) | `/site/start-buttons/` |
 | Referencias | [testimonials.md](./testimonials.md) | `/site/testimonials/` |

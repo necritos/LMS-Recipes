@@ -213,3 +213,36 @@ def update_mailchimp_settings(*, fields: dict) -> SiteSettings:
         setattr(settings, key, value)
     settings.save()
     return settings
+
+
+@transaction.atomic
+def update_google_oauth_settings(*, fields: dict) -> SiteSettings:
+    settings = get_site_settings()
+    if fields.get("google_client_secret") == "":
+        fields["google_client_secret"] = settings.google_client_secret
+
+    enabled = fields.get("google_oauth_enabled", settings.google_oauth_enabled)
+    if "google_client_id" in fields and isinstance(fields["google_client_id"], str):
+        fields["google_client_id"] = fields["google_client_id"].strip()
+    client_id = fields.get("google_client_id", settings.google_client_id)
+
+    if enabled and not (client_id or "").strip():
+        raise BusinessError(
+            "GOOGLE_CONFIG_INCOMPLETE",
+            "Para activar Google OAuth necesitas el Client ID (tipo Web application).",
+            http_status=422,
+        )
+
+    client_id_value = (client_id or "").strip()
+    if client_id_value and not client_id_value.endswith(".apps.googleusercontent.com"):
+        raise BusinessError(
+            "GOOGLE_CLIENT_ID_INVALID",
+            "El Client ID debe terminar en .apps.googleusercontent.com "
+            "(OAuth client de tipo Web application).",
+            http_status=422,
+        )
+
+    for key, value in fields.items():
+        setattr(settings, key, value)
+    settings.save()
+    return settings

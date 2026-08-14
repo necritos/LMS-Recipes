@@ -113,16 +113,17 @@ DATABASE_URL=postgres://user:pass@host:25060/recetario?sslmode=require
 CELERY_BROKER_URL=rediss://...
 CELERY_RESULT_BACKEND=rediss://...
 
-# Google OAuth
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
+# Google OAuth: preferible admin PATCH /api/v1/admin/site/google/
+# Fallback legacy (solo si google_oauth_enabled=false):
+# GOOGLE_CLIENT_ID=
 
-# Stripe, Bunny.net, Firebase y Mailchimp: credenciales en admin (nunca en .env)
+# Stripe, Bunny.net, Firebase, Mailchimp y Google OAuth: credenciales en admin (nunca en .env)
 # Guía: docs/configurar-integraciones.md
 # PATCH /api/v1/admin/site/stripe/
 # PATCH /api/v1/admin/site/bunny/
 # PATCH /api/v1/admin/site/settings/
 # PATCH /api/v1/admin/site/mailchimp/
+# PATCH /api/v1/admin/site/google/
 
 # Storage (DO Spaces)
 AWS_ACCESS_KEY_ID=
@@ -238,7 +239,7 @@ Prefijo base: `/api/v1/`
 | `/api/v1/auth/` | Registro/login | login, register, Google OAuth, reset password |
 | `/api/v1/me/` | Usuario autenticado | Carrito, compras, biblioteca, progreso, video firmado |
 | `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe Checkout |
-| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, Stripe, Mailchimp, usuarios, dashboard |
+| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, Stripe, Mailchimp, Google, usuarios, dashboard |
 | `/api/v1/webhooks/stripe/` | Stripe | Eventos de pago |
 
 ### Contrato de respuesta (heredado de BEDERR)
@@ -323,6 +324,7 @@ Prefijo base: `/api/v1/`
 - [x] Endpoint `POST /api/v1/auth/refresh/` y logout con blacklist
 - [x] Endpoint `POST /api/v1/admin/auth/login/` para staff
 - [x] Integrar Google OAuth (`POST /api/v1/auth/google/`)
+- [x] Credenciales Google OAuth vía admin `GET/PATCH /admin/site/google/` (como Firebase; fallback env)
 - [x] Flujo password reset: solicitud + confirmación con token
 - [x] Template email recuperación de contraseña
 - [x] Permisos DRF: `IsStaffUser`, `IsAuthenticatedUser`
@@ -680,6 +682,6 @@ Las reglas de desarrollo para agentes y desarrolladores están en:
 - Mockups UI solo referencia visual (no desarrollo): `../RECETARIO-TEMPLATES/`
 - [Digital Ocean App Platform](https://docs.digitalocean.com/products/app-platform/)
 - [Bunny.net Stream API](https://docs.bunny.net/docs/stream)
-- Guía de integraciones (Firebase, Bunny, Stripe, Mailchimp): [`docs/configurar-integraciones.md`](./configurar-integraciones.md)
+- Guía de integraciones (Firebase, Bunny, Stripe, Mailchimp, Google): [`docs/configurar-integraciones.md`](./configurar-integraciones.md)
 - Newsletter frontend: [`docs/frontend-newsletter.md`](./frontend-newsletter.md)
 - [Stripe Checkout](https://stripe.com/docs/checkout)

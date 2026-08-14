@@ -9,7 +9,8 @@ Guía paso a paso (consola + PATCH): [configurar-integraciones.md](../../../conf
 
 Video (Bunny.net): [bunny.md](./bunny.md) — `GET/PATCH /site/bunny/`.  
 Pagos (Stripe): [stripe.md](./stripe.md) — `GET/PATCH /site/stripe/`.  
-Mailchimp: [mailchimp.md](./mailchimp.md) — `GET/PATCH /site/mailchimp/`.
+Mailchimp: [mailchimp.md](./mailchimp.md) — `GET/PATCH /site/mailchimp/`.  
+Google OAuth: [google.md](./google.md) — `GET/PATCH /site/google/`.
 
 ## Prioridad de storage
 

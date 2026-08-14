@@ -15,6 +15,7 @@ from apps.site.services.inbox_service import (  # noqa: F401
     subscribe_newsletter,
 )
 from apps.site.services.settings_service import (  # noqa: F401
+    update_google_oauth_settings,
     update_mailchimp_settings,
     update_site_settings,
 )

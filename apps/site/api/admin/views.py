@@ -10,6 +10,7 @@ from apps.site.api.serializers import (
     AdminBunnySettingsSerializer,
     AdminContactMessageSerializer,
     AdminContactReadSerializer,
+    AdminGoogleOAuthSettingsSerializer,
     AdminMailchimpSettingsSerializer,
     AdminNewsletterSerializer,
     AdminSiteSettingsSerializer,
@@ -49,6 +50,7 @@ from apps.site.services.mailchimp_service import (
 )
 from apps.site.services.settings_service import (
     update_bunny_settings,
+    update_google_oauth_settings,
     update_mailchimp_settings,
     update_site_settings,
     update_stripe_settings,
@@ -124,6 +126,24 @@ class AdminMailchimpSettingsView(APIView):
         serializer.is_valid(raise_exception=True)
         settings = update_mailchimp_settings(fields=serializer.validated_data)
         output = AdminMailchimpSettingsSerializer(settings)
+        return Response({"data": output.data, "meta": {}})
+
+
+class AdminGoogleOAuthSettingsView(APIView):
+    permission_classes = [IsStaffUser]
+
+    @extend_schema(tags=["Admin — Site"])
+    def get(self, request):
+        settings = get_site_settings()
+        serializer = AdminGoogleOAuthSettingsSerializer(settings)
+        return Response({"data": serializer.data, "meta": {}})
+
+    @extend_schema(tags=["Admin — Site"], request=AdminGoogleOAuthSettingsSerializer)
+    def patch(self, request):
+        serializer = AdminGoogleOAuthSettingsSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        settings = update_google_oauth_settings(fields=serializer.validated_data)
+        output = AdminGoogleOAuthSettingsSerializer(settings)
         return Response({"data": output.data, "meta": {}})
 
 

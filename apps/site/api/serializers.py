@@ -319,6 +319,24 @@ class AdminMailchimpSettingsSerializer(serializers.ModelSerializer):
         return key.rsplit("-", 1)[-1].strip().lower()
 
 
+class AdminGoogleOAuthSettingsSerializer(serializers.ModelSerializer):
+    google_configured = serializers.SerializerMethodField()
+    google_client_secret = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = SiteSettings
+        fields = (
+            "google_oauth_enabled",
+            "google_client_id",
+            "google_configured",
+            "google_client_secret",
+        )
+        read_only_fields = ("google_configured",)
+
+    def get_google_configured(self, obj) -> bool:
+        return bool(obj.google_oauth_enabled) and bool((obj.google_client_id or "").strip())
+
+
 class AdminSliderTranslationSerializer(serializers.ModelSerializer):
     language_code = serializers.CharField(source="language.code", read_only=True)
 
