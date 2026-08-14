@@ -4,6 +4,10 @@ from django.core.exceptions import ImproperlyConfigured
 
 from apps.common.storage_config import configure_media_storage
 from config.settings.base import *  # noqa: F403
+from config.settings.cors_defaults import (
+    PRODUCTION_CORS_ORIGIN_REGEXES,
+    PRODUCTION_CSRF_TRUSTED_ORIGINS,
+)
 from config.settings.database import get_default_database
 
 DEBUG = False
@@ -21,17 +25,24 @@ CORS_ALLOWED_ORIGINS = [  # noqa: F405
     o.strip() for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if o.strip()
 ]
 
+# Wildcards: django-cors-headers no admite * en CORS_ALLOWED_ORIGINS.
+CORS_ALLOWED_ORIGIN_REGEXES = list(PRODUCTION_CORS_ORIGIN_REGEXES)
+
 if os.environ.get("CORS_ALLOW_LOCALHOST", "").lower() in ("true", "1", "yes"):
-    CORS_ALLOWED_ORIGIN_REGEXES = [  # noqa: F405
-        r"^http://localhost:\d+$",
-        r"^http://127\.0\.0\.1:\d+$",
-    ]
+    CORS_ALLOWED_ORIGIN_REGEXES.extend(
+        [
+            r"^http://localhost:\d+$",
+            r"^http://127\.0\.0\.1:\d+$",
+        ]
+    )
 
 CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
 ]
 if not CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+    CSRF_TRUSTED_ORIGINS = list(
+        dict.fromkeys([*CORS_ALLOWED_ORIGINS, *PRODUCTION_CSRF_TRUSTED_ORIGINS])
+    )
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "false").lower() == "true"

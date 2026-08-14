@@ -137,8 +137,8 @@ AWS_S3_REGION_NAME=nyc3
 # EMAIL_HOST_PASSWORD=
 # DEFAULT_FROM_EMAIL=
 
-# CORS (dominios del frontend externo, no desarrollado aquí)
-CORS_ALLOWED_ORIGINS=https://recetario.com
+# CORS (dominios del frontend; en prod además hay wildcards en production.py)
+CORS_ALLOWED_ORIGINS=https://petralicious.sk
 ```
 
 ---

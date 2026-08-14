@@ -89,19 +89,33 @@ git remote set-url origin git@github.com:necritos/LMS-Recipes.git
 git fetch origin
 ```
 
-## CORS para frontend en localhost
+## CORS (producción)
+
+En `config/settings/production.py` ya están permitidos por regex (sin listar cada subdominio en `.env`):
+
+| Patrón | Cubre |
+|--------|--------|
+| `*.web.app` | p. ej. `https://petralicious-aac3c.web.app` |
+| `petralicious.com` y `*.petralicious.com` | apex + `www`, `admin`, … |
+| `petralicious.sk` y `*.petralicious.sk` | idem |
+
+Solo **https**. Orígenes extra exactos van en `CORS_ALLOWED_ORIGINS` (p. ej. `firebaseapp.com` o localhost).
+
+### Frontend en localhost (dev contra API de prod)
 
 En `.env` del Droplet:
 
 ```env
 CORS_ALLOW_LOCALHOST=true
-CORS_ALLOWED_ORIGINS=https://petralicious.sk,https://www.petralicious.sk,http://localhost:5173,http://127.0.0.1:5173
+# Opcional: orígenes exactos adicionales
+CORS_ALLOWED_ORIGINS=https://petralicious-aac3c.firebaseapp.com
 ```
 
 ```bash
 systemctl restart recetario-api
 ```
 
+> El panel admin en Firebase Hosting (`*.web.app`) ya entra por el regex; `*.firebaseapp.com` no está en el wildcard — si lo usáis, añadidlo en `CORS_ALLOWED_ORIGINS`.
 ## Job diario: accesos vencidos
 
 El 403 `ACCESS_EXPIRED` se calcula en tiempo real con `expires_at`. El job Celery `content.expire_access_grants` cuenta grants vencidos (métrica / futuro email).
