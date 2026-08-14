@@ -66,3 +66,7 @@ Guía de idiomas: [admin/catalog/languages.md](./admin/catalog/languages.md).
 ## Índice — Admin Usuarios
 
 Ver [admin/users/README.md](./admin/users/README.md).
+
+## Índice — Sitio / CMS
+
+Ver [admin/site/README.md](./admin/site/README.md) y [public/site.md](./public/site.md).

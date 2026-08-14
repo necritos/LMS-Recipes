@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.notifications",
     "apps.catalog",
+    "apps.site",
 ]
 
 AUTH_USER_MODEL = "accounts.StaffUser"
@@ -89,6 +90,15 @@ STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+STORAGES = {
+    "default": {
+        "BACKEND": "apps.common.storage.RecetarioDynamicStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
@@ -117,6 +127,11 @@ SPECTACULAR_SETTINGS = {
         {"name": "Admin — Auth", "description": "Autenticación del panel administrativo"},
         {"name": "Admin — Catalog", "description": "CRUD de cursos, recetas, categorías e idiomas"},
         {"name": "Admin — Users", "description": "Listado y detalle de usuarios finales"},
+        {"name": "Public — Site", "description": "Home, contacto y newsletter"},
+        {
+            "name": "Admin — Site",
+            "description": "CMS del sitio, Firebase Storage, inbox y newsletter",
+        },
     ],
     "COMPONENT_SPLIT_REQUEST": True,
 }

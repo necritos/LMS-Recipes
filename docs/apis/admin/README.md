@@ -19,6 +19,12 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 | [catalog/courses.md](./catalog/courses.md) | CRUD cursos |
 | [catalog/recipes.md](./catalog/recipes.md) | CRUD recetas |
 
+## Sitio (CMS)
+
+| Documento | Descripción |
+|-----------|-------------|
+| [site/README.md](./site/README.md) | Índice CMS, Firebase, contacto, newsletter |
+
 ## Usuarios
 
 | Documento | Descripción |

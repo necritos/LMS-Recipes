@@ -9,9 +9,7 @@ def _use_s3_storage() -> bool:
 
 
 def get_media_storage_backend() -> str:
-    if _use_s3_storage():
-        return "apps.common.storage.RecetarioMediaStorage"
-    return "django.core.files.storage.FileSystemStorage"
+    return "apps.common.storage.RecetarioDynamicStorage"
 
 
 def configure_media_storage() -> None:

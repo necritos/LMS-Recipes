@@ -14,13 +14,15 @@ Plataforma **LMS + E-commerce** expuesta vía Django/DRF para venta de cursos y 
 - **Local:** SQLite (default Django, sin Postgres obligatorio)
 - **Prod:** PostgreSQL 16 en Digital Ocean Managed Database
 - Celery + Redis (emails, expiración accesos, webhooks)
-- Stripe (pagos), Bunny.net Stream (URLs firmadas), DO Spaces (media)
+- Stripe (pagos), Bunny.net Stream (URLs firmadas)
+- Imágenes: **Firebase Storage** (configurable en admin) → fallback DO Spaces / filesystem
 - Referencia arquitectónica: BEDERR-BACKEND (capas, servicios, envelope API)
 
 ## Apps del dominio
 - `common` — base models, permisos, paginación, errores
 - `accounts` — UserAccount, StaffUser, JWT, Google OAuth
 - `catalog` — Course, Recipe, Category, Language
+- `site` — CMS home, Firebase config, contacto, newsletter
 - `commerce` — Cart, Order, Stripe
 - `content` — Module, Lesson, VideoAccessToken
 - `notifications` — emails Celery (templates email sí; UI no)

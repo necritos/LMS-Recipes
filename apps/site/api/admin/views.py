@@ -1,0 +1,224 @@
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
+from rest_framework import mixins, status, viewsets
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.common.permissions import IsStaffUser
+from apps.site.api.serializers import (
+    AdminContactMessageSerializer,
+    AdminContactReadSerializer,
+    AdminNewsletterSerializer,
+    AdminSiteSettingsSerializer,
+    AdminSliderSerializer,
+    AdminStartButtonSerializer,
+    AdminTestimonialSerializer,
+)
+from apps.site.models import (
+    ContactMessage,
+    HomeSlider,
+    NewsletterSubscriber,
+    StartButton,
+    Testimonial,
+)
+from apps.site.selectors import (
+    admin_contact_messages,
+    admin_newsletter_subscribers,
+    get_site_settings,
+)
+from apps.site.services.content_service import (
+    create_slider,
+    create_start_button,
+    create_testimonial,
+    delete_slider,
+    delete_start_button,
+    delete_testimonial,
+    update_slider,
+    update_start_button,
+    update_testimonial,
+)
+from apps.site.services.inbox_service import set_contact_read
+from apps.site.services.settings_service import update_site_settings
+
+
+class AdminSiteSettingsView(APIView):
+    permission_classes = [IsStaffUser]
+
+    @extend_schema(tags=["Admin — Site"])
+    def get(self, request):
+        settings = get_site_settings()
+        serializer = AdminSiteSettingsSerializer(settings)
+        return Response({"data": serializer.data, "meta": {}})
+
+    @extend_schema(tags=["Admin — Site"], request=AdminSiteSettingsSerializer)
+    def patch(self, request):
+        serializer = AdminSiteSettingsSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        settings = update_site_settings(fields=serializer.validated_data)
+        output = AdminSiteSettingsSerializer(settings)
+        return Response({"data": output.data, "meta": {}})
+
+
+@extend_schema_view(
+    list=extend_schema(tags=["Admin — Site"]),
+    retrieve=extend_schema(tags=["Admin — Site"]),
+    create=extend_schema(tags=["Admin — Site"]),
+    update=extend_schema(tags=["Admin — Site"]),
+    partial_update=extend_schema(tags=["Admin — Site"]),
+    destroy=extend_schema(tags=["Admin — Site"]),
+)
+class AdminSliderViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffUser]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
+    serializer_class = AdminSliderSerializer
+    queryset = HomeSlider.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        slider = create_slider(**serializer.validated_data)
+        output = self.get_serializer(slider)
+        return Response(output.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        slider = self.get_object()
+        serializer = self.get_serializer(data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        slider = update_slider(slider=slider, **serializer.validated_data)
+        output = self.get_serializer(slider)
+        return Response(output.data)
+
+    def perform_destroy(self, instance):
+        delete_slider(slider=instance)
+
+
+@extend_schema_view(
+    list=extend_schema(tags=["Admin — Site"]),
+    retrieve=extend_schema(tags=["Admin — Site"]),
+    create=extend_schema(tags=["Admin — Site"]),
+    update=extend_schema(tags=["Admin — Site"]),
+    partial_update=extend_schema(tags=["Admin — Site"]),
+    destroy=extend_schema(tags=["Admin — Site"]),
+)
+class AdminStartButtonViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffUser]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
+    serializer_class = AdminStartButtonSerializer
+    queryset = StartButton.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        button = create_start_button(**serializer.validated_data)
+        output = self.get_serializer(button)
+        return Response(output.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        button = self.get_object()
+        serializer = self.get_serializer(data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        button = update_start_button(button=button, **serializer.validated_data)
+        output = self.get_serializer(button)
+        return Response(output.data)
+
+    def perform_destroy(self, instance):
+        delete_start_button(button=instance)
+
+
+@extend_schema_view(
+    list=extend_schema(tags=["Admin — Site"]),
+    retrieve=extend_schema(tags=["Admin — Site"]),
+    create=extend_schema(tags=["Admin — Site"]),
+    update=extend_schema(tags=["Admin — Site"]),
+    partial_update=extend_schema(tags=["Admin — Site"]),
+    destroy=extend_schema(tags=["Admin — Site"]),
+)
+class AdminTestimonialViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffUser]
+    serializer_class = AdminTestimonialSerializer
+    queryset = Testimonial.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        item = create_testimonial(**serializer.validated_data)
+        output = self.get_serializer(item)
+        return Response(output.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        item = self.get_object()
+        serializer = self.get_serializer(data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        item = update_testimonial(testimonial=item, **serializer.validated_data)
+        output = self.get_serializer(item)
+        return Response(output.data)
+
+    def perform_destroy(self, instance):
+        delete_testimonial(testimonial=instance)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Admin — Site"],
+        parameters=[
+            OpenApiParameter("is_read", bool, description="Filtrar leídos / no leídos"),
+        ],
+    ),
+    retrieve=extend_schema(tags=["Admin — Site"]),
+    partial_update=extend_schema(tags=["Admin — Site"]),
+    destroy=extend_schema(tags=["Admin — Site"]),
+)
+class AdminContactMessageViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    permission_classes = [IsStaffUser]
+    serializer_class = AdminContactMessageSerializer
+    queryset = ContactMessage.objects.all()
+    http_method_names = ["get", "patch", "delete", "head", "options"]
+
+    def get_queryset(self):
+        raw = self.request.query_params.get("is_read")
+        is_read = None
+        if raw is not None:
+            is_read = raw.lower() in {"true", "1", "yes"}
+        return admin_contact_messages(is_read=is_read)
+
+    def partial_update(self, request, *args, **kwargs):
+        serializer = AdminContactReadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        message = set_contact_read(
+            message=self.get_object(),
+            is_read=serializer.validated_data["is_read"],
+        )
+        output = AdminContactMessageSerializer(message)
+        return Response(output.data)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Admin — Site"],
+        parameters=[OpenApiParameter("search", str, description="Filtrar por email")],
+    ),
+    retrieve=extend_schema(tags=["Admin — Site"]),
+    destroy=extend_schema(tags=["Admin — Site"]),
+)
+class AdminNewsletterViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    permission_classes = [IsStaffUser]
+    serializer_class = AdminNewsletterSerializer
+    queryset = NewsletterSubscriber.objects.all()
+
+    def get_queryset(self):
+        search = self.request.query_params.get("search", "").strip()
+        return admin_newsletter_subscribers(search=search)

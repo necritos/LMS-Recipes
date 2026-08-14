@@ -43,7 +43,7 @@ Ver sección 9. En resumen: landing page, diseño responsive, reproductor embebi
 | BD prod | **PostgreSQL 16** | Digital Ocean Managed Database |
 | Cache/Queue | Redis 7 | Celery broker (Managed Redis en DO) |
 | Tareas async | Celery | Emails, webhooks, expiración de accesos |
-| Storage prod | Digital Ocean Spaces | S3-compatible (imágenes, assets) |
+| Storage prod | Firebase Storage (admin) / DO Spaces fallback | Imágenes públicas |
 | Video hosting | Bunny.net Stream | URLs firmadas, sin descarga |
 | Pagos | Stripe | Checkout + webhooks |
 | Email | SendGrid o Resend | Transaccional |
@@ -172,6 +172,7 @@ recetario-backend/
 │   ├── common/                 # Base models, permissions, pagination, errors
 │   ├── accounts/               # User, Staff, JWT, Google OAuth
 │   ├── catalog/                # Course, Recipe, Category, Language, Pricing
+│   ├── site/                   # CMS home, Firebase storage config, contacto, newsletter
 │   ├── commerce/               # Cart, Order, Stripe, webhooks
 │   ├── content/                # Lesson, Module, VideoAccess, progress
 │   ├── notifications/          # Email templates + Celery tasks
@@ -236,11 +237,11 @@ Prefijo base: `/api/v1/`
 
 | Prefijo | Audiencia | Ejemplos |
 |---------|-----------|----------|
-| `/api/v1/public/` | Visitantes | Catálogo, detalle curso/receta, idiomas |
+| `/api/v1/public/` | Visitantes | Catálogo, detalle curso/receta, idiomas, home, contacto, newsletter |
 | `/api/v1/auth/` | Registro/login | login, register, Google OAuth, reset password |
 | `/api/v1/me/` | Usuario autenticado | Mis cursos, mis recetas, carrito, perfil |
 | `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe, confirmar pago |
-| `/api/v1/admin/` | Staff | CRUD catálogo, listado usuarios, dashboard |
+| `/api/v1/admin/` | Staff | CRUD catálogo, CMS sitio, Firebase, usuarios, dashboard |
 | `/api/v1/webhooks/stripe/` | Stripe | Eventos de pago |
 
 ### Contrato de respuesta (heredado de BEDERR)
@@ -271,6 +272,7 @@ Prefijo base: `/api/v1/`
 | 0 — Fundación | 1 | ✅ Completada |
 | 1 — Autenticación | 2 | ✅ Completada |
 | 2 — Catálogo | 3 | ✅ Completada |
+| 2.5 — Sitio / Firebase / contacto | 3 | ✅ Completada |
 | 3 — Contenido y video | 4 | ⬜ Pendiente |
 | 4 — E-commerce | 5 | ⬜ Pendiente |
 | 5 — APIs usuario | 6 | ⬜ Pendiente |
@@ -382,6 +384,33 @@ Prefijo base: `/api/v1/`
 - [x] Catálogo público filtra correctamente por idioma
 - [x] Imágenes de portada se suben y sirven correctamente
 - [x] Staff puede listar usuarios registrados
+
+**Fase completada:** ✅
+
+---
+
+### Fase 2.5 — Sitio, Firebase Storage, contacto y newsletter
+
+**Objetivo:** CMS del home, storage de imágenes configurable (Firebase) y captación (contacto + newsletter).
+
+#### Checklist
+
+- [x] App `site` con `SiteSettings` (sobre mí HTML, redes, teléfonos, email)
+- [x] Firebase Storage configurable por API admin (`PATCH /admin/site/settings/`)
+- [x] Storage dinámico: Firebase → DO Spaces → filesystem (todas las ImageField)
+- [x] CRUD sliders (imagen, título, texto, enlace, texto enlace)
+- [x] CRUD «por dónde empezar» (color, imagen, título, enlace, texto enlace)
+- [x] CRUD referencias (estrellas, comentario, nombre)
+- [x] API pública `GET /api/v1/public/site/`
+- [x] Formulario contacto `POST /api/v1/public/contact/` + inbox admin leído/no leído
+- [x] Newsletter `POST /api/v1/public/newsletter/` + listado admin
+- [x] Tests y documentación en `docs/apis/`
+
+#### Criterio de aceptación
+
+- [x] Admin configura Firebase y el JSON de credenciales no se expone en GET
+- [x] Home público devuelve sliders/botones/referencias activos
+- [x] Contacto se marca como leído en admin; newsletter rechaza emails duplicados
 
 **Fase completada:** ✅
 

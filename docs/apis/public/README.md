@@ -1,6 +1,8 @@
-# Public — Catálogo
+# Public — Catálogo y sitio
 
-Endpoints públicos del catálogo (sin autenticación).
+Endpoints públicos (sin autenticación).
+
+## Catálogo
 
 | Endpoint | Documento |
 |----------|-----------|
@@ -13,4 +15,12 @@ Endpoints públicos del catálogo (sin autenticación).
 
 Query param común: `?lang=es` (default: `es`).
 
-Guía completa del sistema multi-idioma (modelo, traducciones, activación): [../admin/catalog/languages.md](../admin/catalog/languages.md).
+Guía multi-idioma: [../admin/catalog/languages.md](../admin/catalog/languages.md).
+
+## Sitio / home
+
+| Endpoint | Documento |
+|----------|-----------|
+| GET `/public/site/` | [site.md](./site.md) |
+| POST `/public/contact/` | [contact.md](./contact.md) |
+| POST `/public/newsletter/` | [newsletter.md](./newsletter.md) |
