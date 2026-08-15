@@ -426,6 +426,8 @@ Prefijo base: `/api/v1/`
 - [x] Crear app `content`
 - [x] Modelo `Module` (pertenece a Course, orden; título por idioma)
 - [x] Modelo `Lesson` (pertenece a Module, `bunny_video_id`, orden; título por idioma)
+- [x] Traducciones: módulo `description`; lección `description` + `content_html` (HTML solo en `/me/`)
+- [x] Receta: `ingredients_html` + `preparation_html` por idioma (solo `GET /me/recipes/{id}/` con acceso)
 - [x] Asociar video único a `Recipe` (`bunny_video_id`)
 - [x] Servicio de URLs firmadas Bunny con TTL (`sign_bunny_video` + `VideoAccessToken`)
 - [x] Credenciales Bunny.net vía admin `GET/PATCH /admin/site/bunny/` (como Firebase; no en env)

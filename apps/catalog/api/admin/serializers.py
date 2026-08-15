@@ -118,6 +118,8 @@ class AdminRecipeTranslationSerializer(serializers.ModelSerializer):
             "language_code",
             "title",
             "description",
+            "ingredients_html",
+            "preparation_html",
             "meta_title",
             "meta_description",
         )

@@ -36,20 +36,27 @@ Content-Type: application/json
     {
       "language_code": "es",
       "title": "Tiramisú clásico",
-      "description": "Receta paso a paso",
+      "description": "Receta paso a paso (teaser público)",
+      "ingredients_html": "<ul><li>250 g mascarpone</li><li>Huevos</li></ul>",
+      "preparation_html": "<ol><li>Separar yemas</li><li>Montar…</li></ol>",
       "meta_title": "Tiramisú — Recetario",
       "meta_description": "Aprende a hacer tiramisú"
     },
     {
-      "language_code": "en",
-      "title": "Classic Tiramisu",
-      "description": "Step by step recipe",
+      "language_code": "sk",
+      "title": "Klasické tiramisu",
+      "description": "Recept krok za krokom",
+      "ingredients_html": "<ul><li>250 g mascarpone</li></ul>",
+      "preparation_html": "<ol><li>Oddeliť žĺtky</li></ol>",
       "meta_title": "Tiramisu — Recetario",
-      "meta_description": "Learn to make tiramisu"
+      "meta_description": "Naučte sa pripraviť tiramisu"
     }
   ]
 }
 ```
+
+`description` es el texto de marketing del catálogo público.  
+`ingredients_html` y `preparation_html` **solo** se entregan en `GET /me/recipes/{id}/` si el usuario compró la receta.
 
 ## Acceso limitado (365 días)
 
@@ -95,7 +102,17 @@ También en `POST` multipart junto con campos JSON (`translations` como string).
 | `sort_order` | int | Orden en listados |
 | `cover_image` | file | Imagen de portada |
 | `bunny_video_id` | string | GUID de Bunny Stream (opcional; no se expone en público) |
-| `translations` | array | Al menos una traducción |
+| `translations` | array | Al menos una; ver campos abajo |
+
+### Traducciones de receta
+
+| Campo | Público | Me (compra) |
+|-------|---------|-------------|
+| `title` | sí | sí |
+| `description` | sí (teaser) | sí |
+| `ingredients_html` | **no** | sí (`GET /me/recipes/{id}/`) |
+| `preparation_html` | **no** | sí |
+| `meta_title` / `meta_description` | sí (SEO) | — |
 
 ## Catálogo público
 

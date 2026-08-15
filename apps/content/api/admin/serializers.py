@@ -9,7 +9,7 @@ class AdminModuleTranslationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ModuleTranslation
-        fields = ("id", "language_code", "title")
+        fields = ("id", "language_code", "title", "description")
 
 
 class AdminLessonTranslationSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class AdminLessonTranslationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LessonTranslation
-        fields = ("id", "language_code", "title")
+        fields = ("id", "language_code", "title", "description", "content_html")
 
 
 class AdminLessonSerializer(JSONTranslationsMixin, serializers.ModelSerializer):

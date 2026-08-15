@@ -8,6 +8,9 @@ class TranslationInputSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200, required=False)
     title = serializers.CharField(max_length=255, required=False)
     description = serializers.CharField(required=False, allow_blank=True, default="")
+    ingredients_html = serializers.CharField(required=False, allow_blank=True, default="")
+    preparation_html = serializers.CharField(required=False, allow_blank=True, default="")
+    content_html = serializers.CharField(required=False, allow_blank=True, default="")
     meta_title = serializers.CharField(required=False, allow_blank=True, default="")
     meta_description = serializers.CharField(required=False, allow_blank=True, default="")
 

@@ -44,8 +44,16 @@ def _add_module_and_lesson(staff_client, course_slug, video_id=VIDEO_ID):
         {
             "sort_order": 0,
             "translations": [
-                {"language_code": "es", "title": "Introducción"},
-                {"language_code": "en", "title": "Introduction"},
+                {
+                    "language_code": "es",
+                    "title": "Introducción",
+                    "description": "Descripción del módulo ES",
+                },
+                {
+                    "language_code": "en",
+                    "title": "Introduction",
+                    "description": "Module description EN",
+                },
             ],
         },
         format="json",
@@ -58,8 +66,18 @@ def _add_module_and_lesson(staff_client, course_slug, video_id=VIDEO_ID):
             "bunny_video_id": video_id,
             "duration_seconds": 90,
             "translations": [
-                {"language_code": "es", "title": "Bienvenida"},
-                {"language_code": "en", "title": "Welcome"},
+                {
+                    "language_code": "es",
+                    "title": "Bienvenida",
+                    "description": "Resumen lección",
+                    "content_html": "<p>Contenido HTML ES</p>",
+                },
+                {
+                    "language_code": "en",
+                    "title": "Welcome",
+                    "description": "Lesson summary",
+                    "content_html": "<p>HTML content EN</p>",
+                },
             ],
         },
         format="json",
@@ -119,7 +137,9 @@ class TestAdminCurriculum:
     def test_create_module_and_lesson(self, staff_client, published_course):
         module, lesson = _add_module_and_lesson(staff_client, "curso-pasta")
         assert module["translations"][0]["title"] in {"Introducción", "Introduction"}
+        assert any(t.get("description") for t in module["translations"])
         assert lesson["bunny_video_id"] == VIDEO_ID
+        assert any(t.get("content_html") for t in lesson["translations"])
 
         listing = staff_client.get("/api/v1/admin/courses/curso-pasta/modules/")
         assert listing.status_code == 200
@@ -154,8 +174,11 @@ class TestPublicCurriculum:
         assert response.status_code == 200
         data = response.json()["data"]
         assert data["modules"][0]["title"] == "Introducción"
+        assert data["modules"][0]["description"] == "Descripción del módulo ES"
         assert data["modules"][0]["lessons"][0]["title"] == "Bienvenida"
+        assert data["modules"][0]["lessons"][0]["description"] == "Resumen lección"
         assert "bunny_video_id" not in data["modules"][0]["lessons"][0]
+        assert "content_html" not in data["modules"][0]["lessons"][0]
 
 
 @pytest.mark.django_db
@@ -173,7 +196,11 @@ class TestMeVideoAccess:
         assert response.status_code == 200, response.json()
         lesson = response.json()["data"]["modules"][0]["lessons"][0]
         assert lesson["title"] == "Bienvenida"
+        assert lesson["description"] == "Resumen lección"
+        assert lesson["content_html"] == "<p>Contenido HTML ES</p>"
         assert "bunny_video_id" not in lesson
+        module = response.json()["data"]["modules"][0]
+        assert module["description"] == "Descripción del módulo ES"
         video = lesson["video"]
         assert BUNNY_LIBRARY in video["signed_video_url"]
         assert "vz-demo.b-cdn.net" in video["hls_url"]
@@ -234,6 +261,51 @@ class TestMeVideoAccess:
         video = response.json()["data"]["video"]
         assert "signed_video_url" in video
         assert "bunny_video_id" not in response.json()["data"]
+
+    def test_recipe_detail_ingredients_only_with_access(
+        self, staff_client, api_client, languages, registered_user
+    ):
+        _enable_bunny(staff_client)
+        created = staff_client.post(
+            "/api/v1/admin/recipes/",
+            {
+                "slug": "tiramisu-full",
+                "price": "8.00",
+                "status": "published",
+                "bunny_video_id": VIDEO_ID,
+                "translations": [
+                    {
+                        "language_code": "es",
+                        "title": "Tiramisú",
+                        "description": "Teaser público",
+                        "ingredients_html": "<ul><li>Mascarpone</li></ul>",
+                        "preparation_html": "<ol><li>Batir</li></ol>",
+                    }
+                ],
+            },
+            format="json",
+        )
+        assert created.status_code == 201, created.json()
+        recipe = created.json()["data"]
+        recipe_id = recipe["id"]
+
+        public = api_client.get("/api/v1/public/recipes/tiramisu-full/?lang=es")
+        assert public.status_code == 200
+        public_data = public.json()["data"]
+        assert public_data["description"] == "Teaser público"
+        assert "ingredients_html" not in public_data
+        assert "preparation_html" not in public_data
+
+        denied = _user_client(registered_user).get(f"/api/v1/me/recipes/{recipe_id}/?lang=es")
+        assert denied.status_code == 403
+
+        _grant(registered_user=registered_user, recipe_id=recipe_id, expires_at=None)
+        detail = _user_client(registered_user).get(f"/api/v1/me/recipes/{recipe_id}/?lang=es")
+        assert detail.status_code == 200, detail.json()
+        data = detail.json()["data"]
+        assert data["ingredients_html"] == "<ul><li>Mascarpone</li></ul>"
+        assert data["preparation_html"] == "<ol><li>Batir</li></ol>"
+        assert data["video"]["signed_video_url"]
 
     def test_bunny_not_configured(self, staff_client, published_course, registered_user):
         _add_module_and_lesson(staff_client, "curso-pasta")

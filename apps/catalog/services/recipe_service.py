@@ -35,6 +35,8 @@ def _upsert_recipe_translations(*, recipe: Recipe, translations: list[dict]) -> 
             language=language,
             title=item["title"].strip(),
             description=item.get("description", ""),
+            ingredients_html=item.get("ingredients_html", ""),
+            preparation_html=item.get("preparation_html", ""),
             meta_title=item.get("meta_title", ""),
             meta_description=item.get("meta_description", ""),
         )

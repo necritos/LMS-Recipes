@@ -27,6 +27,23 @@ def get_recipe_or_404(*, recipe_id) -> Recipe:
     return recipe
 
 
+def get_recipe_for_player(*, recipe_id, language: Language) -> Recipe:
+    recipe = (
+        Recipe.objects.filter(pk=recipe_id)
+        .prefetch_related(
+            Prefetch(
+                "translations",
+                queryset=RecipeTranslation.objects.filter(language=language),
+                to_attr="active_translations",
+            )
+        )
+        .first()
+    )
+    if recipe is None:
+        raise BusinessError("RECIPE_NOT_FOUND", "Receta no encontrada.", http_status=404)
+    return recipe
+
+
 def get_lesson_or_404(*, lesson_id) -> Lesson:
     lesson = (
         Lesson.objects.select_related("module__course")

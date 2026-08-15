@@ -28,7 +28,12 @@ def upsert_module_translations(*, module: Module, translations: list[dict]) -> N
                 "Cada traducción del módulo necesita title.",
                 http_status=422,
             )
-        ModuleTranslation.objects.create(module=module, language=language, title=title)
+        ModuleTranslation.objects.create(
+            module=module,
+            language=language,
+            title=title,
+            description=item.get("description", "") or "",
+        )
 
 
 def upsert_lesson_translations(*, lesson: Lesson, translations: list[dict]) -> None:
@@ -44,7 +49,13 @@ def upsert_lesson_translations(*, lesson: Lesson, translations: list[dict]) -> N
                 "Cada traducción de la lección necesita title.",
                 http_status=422,
             )
-        LessonTranslation.objects.create(lesson=lesson, language=language, title=title)
+        LessonTranslation.objects.create(
+            lesson=lesson,
+            language=language,
+            title=title,
+            description=item.get("description", "") or "",
+            content_html=item.get("content_html", "") or "",
+        )
 
 
 @transaction.atomic

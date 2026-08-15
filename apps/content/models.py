@@ -25,6 +25,7 @@ class ModuleTranslation(UUIDModel, TimeStampedModel):
         related_name="module_translations",
     )
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
 
     class Meta:
         constraints = [
@@ -60,6 +61,8 @@ class LessonTranslation(UUIDModel, TimeStampedModel):
         related_name="lesson_translations",
     )
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    content_html = models.TextField(blank=True)
 
     class Meta:
         constraints = [

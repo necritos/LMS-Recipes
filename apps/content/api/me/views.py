@@ -19,6 +19,7 @@ from apps.content.selectors import (
     active_recipe_grants,
     get_course_or_404,
     get_lesson_or_404,
+    get_recipe_for_player,
     get_recipe_or_404,
     player_modules_for_course,
     progress_rows_for_course,
@@ -74,6 +75,44 @@ class MeRecipeVideoView(APIView):
             recipe=recipe,
         )
         return Response({"data": {"recipe_id": str(recipe.id), "video": video}, "meta": {}})
+
+
+class MeRecipeDetailView(APIView):
+    """Contenido de receta (ingredientes/preparación) + video. Solo con AccessGrant."""
+
+    permission_classes = [HasActiveAccess]
+
+    def get_access_target(self):
+        return {"recipe": get_recipe_or_404(recipe_id=self.kwargs["recipe_id"])}
+
+    @extend_schema(
+        tags=["Me"],
+        parameters=[OpenApiParameter("lang", str, description="Código de idioma (default: es)")],
+    )
+    def get(self, request, recipe_id):
+        language = _lang(request)
+        recipe = get_recipe_for_player(recipe_id=recipe_id, language=language)
+        video = None
+        if recipe.bunny_video_id:
+            video = issue_signed_video(
+                user=request.user,
+                video_id=recipe.bunny_video_id,
+                recipe=recipe,
+            )
+        return Response(
+            {
+                "data": {
+                    "id": str(recipe.id),
+                    "slug": recipe.slug,
+                    "title": get_active_translation(recipe, "title") or recipe.slug,
+                    "description": get_active_translation(recipe, "description"),
+                    "ingredients_html": get_active_translation(recipe, "ingredients_html"),
+                    "preparation_html": get_active_translation(recipe, "preparation_html"),
+                    "video": video,
+                },
+                "meta": {},
+            }
+        )
 
 
 def _lang(request):

@@ -172,6 +172,8 @@ class RecipeTranslation(UUIDModel, TimeStampedModel):
     )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    ingredients_html = models.TextField(blank=True)
+    preparation_html = models.TextField(blank=True)
     meta_title = models.CharField(max_length=255, blank=True)
     meta_description = models.CharField(max_length=320, blank=True)
 

@@ -28,14 +28,30 @@ def continue_lesson_payload(*, user, course, language=None) -> dict | None:
 
 class MeLessonSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    content_html = serializers.SerializerMethodField()
     video = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
-        fields = ("id", "title", "duration_seconds", "sort_order", "video")
+        fields = (
+            "id",
+            "title",
+            "description",
+            "content_html",
+            "duration_seconds",
+            "sort_order",
+            "video",
+        )
 
     def get_title(self, obj) -> str:
         return get_active_translation(obj, "title")
+
+    def get_description(self, obj) -> str:
+        return get_active_translation(obj, "description")
+
+    def get_content_html(self, obj) -> str:
+        return get_active_translation(obj, "content_html")
 
     def get_video(self, obj):
         videos = self.context.get("signed_videos") or {}
@@ -44,37 +60,49 @@ class MeLessonSerializer(serializers.ModelSerializer):
 
 class MeModuleSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
     lessons = MeLessonSerializer(many=True)
 
     class Meta:
         model = Module
-        fields = ("id", "title", "sort_order", "lessons")
+        fields = ("id", "title", "description", "sort_order", "lessons")
 
     def get_title(self, obj) -> str:
         return get_active_translation(obj, "title")
+
+    def get_description(self, obj) -> str:
+        return get_active_translation(obj, "description")
 
 
 class PublicCurriculumLessonSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
-        fields = ("id", "title", "duration_seconds", "sort_order")
+        fields = ("id", "title", "description", "duration_seconds", "sort_order")
 
     def get_title(self, obj) -> str:
         return get_active_translation(obj, "title")
+
+    def get_description(self, obj) -> str:
+        return get_active_translation(obj, "description")
 
 
 class PublicCurriculumModuleSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
     lessons = PublicCurriculumLessonSerializer(many=True)
 
     class Meta:
         model = Module
-        fields = ("id", "title", "sort_order", "lessons")
+        fields = ("id", "title", "description", "sort_order", "lessons")
 
     def get_title(self, obj) -> str:
         return get_active_translation(obj, "title")
+
+    def get_description(self, obj) -> str:
+        return get_active_translation(obj, "description")
 
 
 class MeAccessSerializer(serializers.ModelSerializer):

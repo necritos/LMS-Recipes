@@ -1,6 +1,6 @@
 # Admin — Módulos y lecciones
 
-Estructura de un curso. Títulos por idioma. El `bunny_video_id` es global (un video por lección).
+Estructura de un curso. Textos por idioma. El `bunny_video_id` es global (un video por lección).
 
 **Auth:** JWT `type=staff`
 
@@ -22,8 +22,16 @@ Estructura de un curso. Títulos por idioma. El `bunny_video_id` es global (un v
   "sort_order": 0,
   "is_active": true,
   "translations": [
-    { "language_code": "es", "title": "Introducción" },
-    { "language_code": "en", "title": "Introduction" }
+    {
+      "language_code": "es",
+      "title": "Introducción",
+      "description": "Qué aprenderás en este módulo"
+    },
+    {
+      "language_code": "sk",
+      "title": "Úvod",
+      "description": "Čo sa naučíte v tomto module"
+    }
   ]
 }
 ```
@@ -37,14 +45,30 @@ Estructura de un curso. Títulos por idioma. El `bunny_video_id` es global (un v
   "sort_order": 0,
   "is_active": true,
   "translations": [
-    { "language_code": "es", "title": "Bienvenida" },
-    { "language_code": "en", "title": "Welcome" }
+    {
+      "language_code": "es",
+      "title": "Bienvenida",
+      "description": "Resumen de la lección",
+      "content_html": "<p>Contenido rico…</p>"
+    },
+    {
+      "language_code": "sk",
+      "title": "Vitajte",
+      "description": "Súhrn lekcie",
+      "content_html": "<p>Obsah…</p>"
+    }
   ]
 }
 ```
 
+| Campo traducción | Dónde se ve |
+|------------------|-------------|
+| `title` | Público + me |
+| `description` (módulo/lección) | Público (temario) + me |
+| `content_html` (lección) | **Solo** `GET /me/courses/{id}/lessons/` (con acceso) |
+
 `bunny_video_id` se puede dejar vacío y asignar después con `PATCH /admin/lessons/{id}/`.
 
-En recetas: `PATCH /admin/recipes/{slug}/` con `{ "bunny_video_id": "..." }`.
+En recetas: `PATCH /admin/recipes/{slug}/` con `{ "bunny_video_id": "..." }` e `ingredients_html` / `preparation_html` en traducciones.
 
-El catálogo público lista el temario **sin** `bunny_video_id`. Las URLs firmadas solo salen en `/api/v1/me/`.
+El catálogo público lista el temario **sin** `bunny_video_id` ni `content_html`. Las URLs firmadas y el HTML de lección solo salen en `/api/v1/me/`.
