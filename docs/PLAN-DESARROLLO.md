@@ -398,6 +398,7 @@ Prefijo base: `/api/v1/`
 #### Checklist
 
 - [x] App `site` con `SiteSettings` (redes, teléfonos, email) y traducciones de «sobre mí»
+- [x] Textos legales por idioma: términos y condiciones, política de privacidad, condiciones de contratación
 - [x] Firebase Storage configurable por API admin (`PATCH /admin/site/settings/`)
 - [x] Storage dinámico: Firebase → DO Spaces → filesystem (todas las ImageField y FileField de recursos)
 - [x] CRUD sliders multi-idioma (imagen global; título/texto/enlace por idioma)
@@ -412,7 +413,7 @@ Prefijo base: `/api/v1/`
 #### Criterio de aceptación
 
 - [x] Admin configura Firebase y el JSON de credenciales no se expone en GET
-- [x] Home público filtra sliders, sobre mí, botones y referencias por `?lang=` (mismo sistema que el catálogo)
+- [x] Home público filtra sliders, sobre mí, textos legales, botones y referencias por `?lang=` (mismo sistema que el catálogo)
 - [x] Contacto se marca como leído en admin; newsletter rechaza emails duplicados
 - [x] Newsletter sincroniza a Mailchimp (Audience, group de idioma, tags) y el listado admin muestra destino
 

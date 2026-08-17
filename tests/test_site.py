@@ -22,6 +22,9 @@ class TestPublicSite:
         assert data["start_buttons"] == []
         assert data["testimonials"] == []
         assert data["about"] == {"title": "", "html": ""}
+        assert data["terms"] == {"title": "", "html": ""}
+        assert data["privacy"] == {"title": "", "html": ""}
+        assert data["contracting"] == {"title": "", "html": ""}
 
     def test_public_site_filters_by_language(self, staff_client, api_client, languages):
         staff_client.post(
@@ -85,8 +88,28 @@ class TestPublicSite:
             "/api/v1/admin/site/settings/",
             {
                 "translations": [
-                    {"language_code": "es", "about_title": "Sobre mí", "about_html": "<p>ES</p>"},
-                    {"language_code": "en", "about_title": "About me", "about_html": "<p>EN</p>"},
+                    {
+                        "language_code": "es",
+                        "about_title": "Sobre mí",
+                        "about_html": "<p>ES</p>",
+                        "terms_title": "Términos y condiciones",
+                        "terms_html": "<p>Términos ES</p>",
+                        "privacy_title": "Política de privacidad",
+                        "privacy_html": "<p>Privacidad ES</p>",
+                        "contracting_title": "Condiciones de contratación",
+                        "contracting_html": "<p>Contratación ES</p>",
+                    },
+                    {
+                        "language_code": "en",
+                        "about_title": "About me",
+                        "about_html": "<p>EN</p>",
+                        "terms_title": "Terms and conditions",
+                        "terms_html": "<p>Terms EN</p>",
+                        "privacy_title": "Privacy policy",
+                        "privacy_html": "<p>Privacy EN</p>",
+                        "contracting_title": "Terms of sale",
+                        "contracting_html": "<p>Sale EN</p>",
+                    },
                 ]
             },
             format="json",
@@ -95,11 +118,15 @@ class TestPublicSite:
         es = api_client.get("/api/v1/public/site/?lang=es").json()["data"]
         assert es["sliders"][0]["title"] == "Hero ES"
         assert es["about"]["title"] == "Sobre mí"
+        assert es["terms"]["title"] == "Términos y condiciones"
+        assert es["privacy"]["html"] == "<p>Privacidad ES</p>"
+        assert es["contracting"]["title"] == "Condiciones de contratación"
         assert es["testimonials"][0]["comment"] == "Excelente"
 
         en = api_client.get("/api/v1/public/site/?lang=en").json()["data"]
         assert en["sliders"][0]["title"] == "Hero EN"
         assert en["about"]["title"] == "About me"
+        assert en["terms"]["title"] == "Terms and conditions"
         assert en["start_buttons"] == []
 
     def test_public_site_unknown_language(self, api_client, languages):
@@ -122,6 +149,12 @@ class TestAdminSiteSettings:
                         "language_code": "es",
                         "about_title": "Sobre Petra",
                         "about_html": "<p>Hola</p>",
+                        "terms_title": "Términos",
+                        "terms_html": "<p>Términos</p>",
+                        "privacy_title": "Privacidad",
+                        "privacy_html": "<p>Privacidad</p>",
+                        "contracting_title": "Contratación",
+                        "contracting_html": "<p>Contratación</p>",
                     }
                 ],
             },
@@ -130,8 +163,47 @@ class TestAdminSiteSettings:
         assert response.status_code == 200
         data = response.json()["data"]
         assert data["translations"][0]["about_title"] == "Sobre Petra"
+        assert data["translations"][0]["terms_title"] == "Términos"
+        assert data["translations"][0]["privacy_title"] == "Privacidad"
+        assert data["translations"][0]["contracting_title"] == "Contratación"
         assert data["storage_backend"] == "local"
         assert "firebase_credentials_json" not in data
+
+    def test_legal_texts_do_not_wipe_about(self, staff_client, languages):
+        staff_client.patch(
+            "/api/v1/admin/site/settings/",
+            {
+                "translations": [
+                    {
+                        "language_code": "es",
+                        "about_title": "Sobre Petra",
+                        "about_html": "<p>Hola</p>",
+                    }
+                ]
+            },
+            format="json",
+        )
+        response = staff_client.patch(
+            "/api/v1/admin/site/settings/",
+            {
+                "translations": [
+                    {
+                        "language_code": "es",
+                        "terms_title": "Términos",
+                        "terms_html": "<p>Términos</p>",
+                    }
+                ]
+            },
+            format="json",
+        )
+        assert response.status_code == 200
+        row = response.json()["data"]["translations"][0]
+        assert row["about_title"] == "Sobre Petra"
+        assert row["terms_title"] == "Términos"
+
+        public = staff_client.get("/api/v1/public/site/?lang=es").json()["data"]
+        assert public["about"]["title"] == "Sobre Petra"
+        assert public["terms"]["title"] == "Términos"
 
     def test_firebase_requires_complete_config(self, staff_client):
         response = staff_client.patch(

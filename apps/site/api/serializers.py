@@ -32,10 +32,14 @@ class SiteTranslationInputSerializer(serializers.Serializer):
     text = serializers.CharField(required=False, allow_blank=True, default="")
     link = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
     link_text = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
-    about_title = serializers.CharField(
-        max_length=255, required=False, allow_blank=True, default=""
-    )
-    about_html = serializers.CharField(required=False, allow_blank=True, default="")
+    about_title = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    about_html = serializers.CharField(required=False, allow_blank=True)
+    terms_title = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    terms_html = serializers.CharField(required=False, allow_blank=True)
+    privacy_title = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    privacy_html = serializers.CharField(required=False, allow_blank=True)
+    contracting_title = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    contracting_html = serializers.CharField(required=False, allow_blank=True)
     html = serializers.CharField(required=False, allow_blank=True, default="")
     name = serializers.CharField(max_length=200, required=False, allow_blank=True, default="")
     comment = serializers.CharField(required=False, allow_blank=True, default="")
@@ -116,6 +120,9 @@ class PublicTestimonialSerializer(serializers.ModelSerializer):
 
 class PublicSiteSerializer(serializers.Serializer):
     about = serializers.DictField()
+    terms = serializers.DictField()
+    privacy = serializers.DictField()
+    contracting = serializers.DictField()
     contact_info = serializers.DictField()
     social = serializers.DictField()
     sliders = PublicSliderSerializer(many=True)
@@ -148,7 +155,18 @@ class AdminAboutTranslationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SiteSettingsTranslation
-        fields = ("id", "language_code", "about_title", "about_html")
+        fields = (
+            "id",
+            "language_code",
+            "about_title",
+            "about_html",
+            "terms_title",
+            "terms_html",
+            "privacy_title",
+            "privacy_html",
+            "contracting_title",
+            "contracting_html",
+        )
 
 
 class AdminSiteSettingsSerializer(JSONTranslationsMixin, serializers.ModelSerializer):

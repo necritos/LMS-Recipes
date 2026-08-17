@@ -12,7 +12,7 @@ from apps.site.api.serializers import (
 )
 from apps.site.selectors import (
     get_site_settings,
-    public_about,
+    public_legal_pages,
     public_sliders,
     public_start_buttons,
     public_testimonials,
@@ -32,8 +32,12 @@ class PublicSiteView(APIView):
         lang = resolve_language_code(request.query_params.get("lang"))
         language = get_active_language(code=lang)
         settings = get_site_settings()
+        pages = public_legal_pages(language=language)
         payload = {
-            "about": public_about(language=language),
+            "about": pages["about"],
+            "terms": pages["terms"],
+            "privacy": pages["privacy"],
+            "contracting": pages["contracting"],
             "contact_info": {
                 "phone_1": settings.phone_1,
                 "phone_2": settings.phone_2,

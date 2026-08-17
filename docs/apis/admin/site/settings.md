@@ -26,7 +26,7 @@ Todas las `ImageField` (portadas de cursos/recetas, sliders, botones) y los `Fil
 
 ## PATCH — ejemplo de contenido
 
-Redes y teléfonos son globales. **Sobre mí** va en `translations` por idioma.
+Redes y teléfonos son globales. **Sobre mí** y los textos legales van en `translations` por idioma: términos y condiciones, política de privacidad y condiciones de contratación.
 
 ```json
 {
@@ -37,19 +37,31 @@ Redes y teléfonos son globales. **Sobre mí** va en `translations` por idioma.
     {
       "language_code": "es",
       "about_title": "Sobre mí",
-      "about_html": "<p>Chef y docente…</p>"
+      "about_html": "<p>Chef y docente…</p>",
+      "terms_title": "Términos y condiciones",
+      "terms_html": "<p>…</p>",
+      "privacy_title": "Política de privacidad",
+      "privacy_html": "<p>…</p>",
+      "contracting_title": "Condiciones de contratación",
+      "contracting_html": "<p>…</p>"
     },
     {
       "language_code": "en",
       "about_title": "About me",
-      "about_html": "<p>Chef and teacher…</p>"
+      "about_html": "<p>Chef and teacher…</p>",
+      "terms_title": "Terms and conditions",
+      "terms_html": "<p>…</p>",
+      "privacy_title": "Privacy policy",
+      "privacy_html": "<p>…</p>",
+      "contracting_title": "Terms of sale",
+      "contracting_html": "<p>…</p>"
     }
   ]
 }
 ```
 
-En GET, `translations` lista `language_code`, `about_title`, `about_html`.
-Si omites `translations` en un PATCH, se conservan las traducciones existentes.
+En GET, `translations` lista `language_code` y los pares `*_title` / `*_html` de sobre mí, términos, privacidad y contratación.
+Si omites `translations` en un PATCH, se conservan las traducciones existentes. Si envías un idioma sin algún texto legal, se conservan los valores previos de ese idioma.
 
 ## PATCH — activar Firebase
 

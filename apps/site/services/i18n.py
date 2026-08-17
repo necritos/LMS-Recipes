@@ -21,16 +21,35 @@ def _require_translations(translations: list[dict] | None) -> list[dict]:
     return translations
 
 
+def _page_fields(item: dict, *, prefix: str, prev) -> dict:
+    title_key = f"{prefix}_title"
+    html_key = f"{prefix}_html"
+    prev_title = getattr(prev, title_key, "") if prev else ""
+    prev_html = getattr(prev, html_key, "") if prev else ""
+    title = (item.get(title_key) or "").strip() if title_key in item else prev_title
+    html = item.get(html_key) or "" if html_key in item else prev_html
+    return {title_key: title, html_key: html}
+
+
 def upsert_settings_translations(*, settings, translations: list[dict]) -> None:
+    existing = {
+        row.language_id: row for row in settings.translations.select_related("language").all()
+    }
     settings.translations.all().delete()
     lang_map = _get_language_map([item["language_code"] for item in translations])
     for item in translations:
         language = lang_map[item["language_code"].strip().lower()]
+        prev = existing.get(language.id)
+        fields = {
+            **_page_fields(item, prefix="about", prev=prev),
+            **_page_fields(item, prefix="terms", prev=prev),
+            **_page_fields(item, prefix="privacy", prev=prev),
+            **_page_fields(item, prefix="contracting", prev=prev),
+        }
         SiteSettingsTranslation.objects.create(
             settings=settings,
             language=language,
-            about_title=(item.get("about_title") or item.get("title") or "").strip(),
-            about_html=item.get("about_html") or item.get("html") or "",
+            **fields,
         )
 
 

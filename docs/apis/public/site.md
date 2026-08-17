@@ -16,6 +16,9 @@ Solo aparecen sliders, botones y referencias **activos** y **con traducción** e
 {
   "data": {
     "about": { "title": "Sobre mí", "html": "<p>…</p>" },
+    "terms": { "title": "Términos y condiciones", "html": "<p>…</p>" },
+    "privacy": { "title": "Política de privacidad", "html": "<p>…</p>" },
+    "contracting": { "title": "Condiciones de contratación", "html": "<p>…</p>" },
     "contact_info": { "phone_1": "+421 111", "phone_2": "", "email": "hola@petralicious.sk" },
     "social": { "instagram": "https://instagram.com/...", "tiktok": "", "facebook": "", "pinterest": "" },
     "sliders": [
@@ -37,6 +40,6 @@ Solo aparecen sliders, botones y referencias **activos** y **con traducción** e
 ```
 
 `contact_info` y `social` no se traducen (datos de contacto globales).
-Sobre mí, sliders, botones y referencias sí.
+Sobre mí, textos legales (términos, privacidad, contratación), sliders, botones y referencias sí.
 
 Si el idioma no existe o está inactivo: `404 LANGUAGE_NOT_FOUND`.

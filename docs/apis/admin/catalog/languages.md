@@ -42,7 +42,7 @@ Categorías, cursos, recetas y textos del home (`site`) tienen tablas hijas de t
 | Categoría | `CategoryTranslation` | `name`, `description` |
 | Curso | `CourseTranslation` | `title`, `description`, `meta_title`, `meta_description` |
 | Receta | `RecipeTranslation` | `title`, `description`, `meta_title`, `meta_description` |
-| Sobre mí | `SiteSettingsTranslation` | `about_title`, `about_html` |
+| Sobre mí / legales | `SiteSettingsTranslation` | `about_*`, `terms_*`, `privacy_*`, `contracting_*` (`title` + `html`) |
 | Slider | `HomeSliderTranslation` | `title`, `text`, `link`, `link_text` |
 | Por dónde empezar | `StartButtonTranslation` | `title`, `link`, `link_text` |
 | Referencias | `TestimonialTranslation` | `name`, `comment` |

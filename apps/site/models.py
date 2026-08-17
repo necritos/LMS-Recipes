@@ -83,6 +83,12 @@ class SiteSettingsTranslation(UUIDModel, TimeStampedModel):
     )
     about_title = models.CharField(max_length=255, blank=True)
     about_html = models.TextField(blank=True)
+    terms_title = models.CharField(max_length=255, blank=True)
+    terms_html = models.TextField(blank=True)
+    privacy_title = models.CharField(max_length=255, blank=True)
+    privacy_html = models.TextField(blank=True)
+    contracting_title = models.CharField(max_length=255, blank=True)
+    contracting_html = models.TextField(blank=True)
 
     class Meta:
         constraints = [

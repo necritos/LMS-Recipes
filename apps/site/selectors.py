@@ -58,12 +58,30 @@ def public_testimonials(*, language: Language) -> QuerySet[Testimonial]:
     ).order_by("sort_order", "created_at")
 
 
-def public_about(*, language: Language) -> dict:
+_EMPTY_PAGE = {"title": "", "html": ""}
+
+
+def _text_page(row, *, title_attr: str, html_attr: str) -> dict:
+    if row is None:
+        return dict(_EMPTY_PAGE)
+    return {"title": getattr(row, title_attr) or "", "html": getattr(row, html_attr) or ""}
+
+
+def public_legal_pages(*, language: Language) -> dict:
     settings = get_site_settings()
     row = SiteSettingsTranslation.objects.filter(settings=settings, language=language).first()
-    if row is None:
-        return {"title": "", "html": ""}
-    return {"title": row.about_title, "html": row.about_html}
+    return {
+        "about": _text_page(row, title_attr="about_title", html_attr="about_html"),
+        "terms": _text_page(row, title_attr="terms_title", html_attr="terms_html"),
+        "privacy": _text_page(row, title_attr="privacy_title", html_attr="privacy_html"),
+        "contracting": _text_page(
+            row, title_attr="contracting_title", html_attr="contracting_html"
+        ),
+    }
+
+
+def public_about(*, language: Language) -> dict:
+    return public_legal_pages(language=language)["about"]
 
 
 def admin_contact_messages(*, is_read: bool | None = None) -> QuerySet[ContactMessage]:
