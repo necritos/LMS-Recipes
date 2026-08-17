@@ -24,6 +24,10 @@ Recetas: `lifetime` (`expires_at: null`) o temporal según el producto.
       "is_lifetime": false,
       "is_active": true,
       "access_days": 365,
+      "format": "online",
+      "event_starts_at": null,
+      "event_address": "",
+      "maps_url": "",
       "continue_lesson": {
         "id": "uuid",
         "module_id": "uuid",
@@ -35,7 +39,9 @@ Recetas: `lifetime` (`expires_at: null`) o temporal según el producto.
 }
 ```
 
-`continue_lesson` es la última lección con `POST /me/lessons/{id}/view/` (o `complete/`); si no hay progreso, la primera lección del curso. `null` si el curso no tiene lecciones.
+`continue_lesson` es la última lección con `POST /me/lessons/{id}/view/` (o `complete/`); si no hay progreso, la primera lección del curso. `null` si el curso no tiene lecciones (p. ej. presencial).
+
+Cada ítem incluye `format` (`online` \| `in_person`) y, en presenciales, `event_starts_at`, `event_address` y `maps_url`.
 
 Un grant vencido **no** aparece aquí; el video responde `403 ACCESS_EXPIRED`.
 

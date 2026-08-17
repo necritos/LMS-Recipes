@@ -8,7 +8,7 @@ Endpoints públicos (sin autenticación).
 |----------|-----------|
 | GET `/public/languages/` | [languages.md](./languages.md) |
 | GET `/public/categories/` | [categories.md](./categories.md) |
-| GET `/public/courses/` | [courses.md](./courses.md) |
+| GET `/public/courses/` | [courses.md](./courses.md) — `?course_format=online\|in_person` |
 | GET `/public/courses/{slug}/` | [course-detail.md](./course-detail.md) |
 | GET `/public/recipes/` | [recipes.md](./recipes.md) |
 | GET `/public/recipes/{slug}/` | [recipe-detail.md](./recipe-detail.md) |

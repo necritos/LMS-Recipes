@@ -20,6 +20,7 @@ Este repositorio desarrolla el **backend Django/DRF** que expone APIs REST para 
 - Catálogo público: cursos y recetas (listado, detalle, categorías)
 - E-commerce: carrito, checkout Stripe, webhooks de pago
 - Acceso a contenido: cursos (1 año) y recetas (lifetime o 1 año)
+- Cursos online (módulos, lecciones, recursos) y presenciales (fecha, dirección, Maps)
 - Video: URLs firmadas vía Bunny.net (el cliente frontend las consume)
 - Admin API: CRUD de contenido, usuarios, dashboard financiero (JSON)
 - Notificaciones: emails transaccionales (HTML mínimo en templates de email)
@@ -355,6 +356,8 @@ Prefijo base: `/api/v1/`
 - [x] Modelo `Language` (código, nombre, activo)
 - [x] Modelo `Category` con soporte multi-idioma
 - [x] Modelo `Course` (precio, slug, duración acceso 365 días, traducciones)
+- [x] Formato de curso `online` \| `in_person` (presencial: fecha/hora, dirección, Google Maps; sin módulos ni recursos)
+- [x] API admin `GET /api/v1/admin/courses/{slug}/purchases/` — compradores del curso
 - [x] Modelo `Recipe` (precio, slug, acceso lifetime/365 días, traducciones)
 - [x] Migraciones y datos seed de idiomas (ES, EN mínimo) — `seed_languages` / `make seed-languages`
 - [x] API pública: `GET /api/v1/public/languages/`
@@ -396,7 +399,7 @@ Prefijo base: `/api/v1/`
 
 - [x] App `site` con `SiteSettings` (redes, teléfonos, email) y traducciones de «sobre mí»
 - [x] Firebase Storage configurable por API admin (`PATCH /admin/site/settings/`)
-- [x] Storage dinámico: Firebase → DO Spaces → filesystem (todas las ImageField)
+- [x] Storage dinámico: Firebase → DO Spaces → filesystem (todas las ImageField y FileField de recursos)
 - [x] CRUD sliders multi-idioma (imagen global; título/texto/enlace por idioma)
 - [x] CRUD «por dónde empezar» multi-idioma (color/imagen globales)
 - [x] CRUD referencias multi-idioma (estrellas globales; nombre/comentario por idioma)
@@ -432,6 +435,7 @@ Prefijo base: `/api/v1/`
 - [x] Servicio de URLs firmadas Bunny con TTL (`sign_bunny_video` + `VideoAccessToken`)
 - [x] Credenciales Bunny.net vía admin `GET/PATCH /admin/site/bunny/` (como Firebase; no en env)
 - [x] API `GET /api/v1/me/courses/{id}/lessons/` con URL de video
+- [x] Recursos de curso (PDF/imagen/archivo) en Firebase; `GET /me/courses/{id}/resources/` solo con AccessGrant
 - [x] API `GET /api/v1/me/recipes/{id}/video/` con URL de video
 - [x] Permiso `HasActiveAccess`: verificar `AccessGrant` activo *(modelo adelantado desde Fase 4)*
 - [x] Respuesta 403 si acceso expirado (`ACCESS_EXPIRED`) o inexistente (`ACCESS_DENIED`)
@@ -523,6 +527,7 @@ Prefijo base: `/api/v1/`
 - [x] Métrica: productos más vendidos
 - [x] API `GET /api/v1/admin/users/` — listado paginado *(implementado en Fase 2)*
 - [x] API `GET /api/v1/admin/users/{id}/` — detalle **con historial de compras** *(detalle en Fase 2; `purchases` real en Fase 4)*
+- [x] API `GET /api/v1/admin/courses/{slug}/purchases/` — listado de compras de un curso (presencial u online) *(implementado con formato de curso)*
 - [x] API gestión idiomas: activar/desactivar (`/admin/languages/`) *(implementado en Fase 2)*
 - [x] Documentar config Stripe (admin `/admin/site/stripe/`, toggle test/live; no env) *(implementado en Fase 4)*
 - [x] Endpoint `GET /api/v1/admin/dashboard/revenue/` — serie temporal ingresos (JSON)

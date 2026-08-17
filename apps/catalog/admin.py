@@ -4,6 +4,8 @@ from apps.catalog.models import (
     Category,
     CategoryTranslation,
     Course,
+    CourseResource,
+    CourseResourceTranslation,
     CourseTranslation,
     Language,
     Recipe,
@@ -38,11 +40,28 @@ class CategoryAdmin(admin.ModelAdmin):
     inlines = [CategoryTranslationInline]
 
 
+class CourseResourceTranslationInline(admin.TabularInline):
+    model = CourseResourceTranslation
+    extra = 1
+
+
+class CourseResourceInline(admin.TabularInline):
+    model = CourseResource
+    extra = 0
+
+
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("slug", "price", "status", "access_days")
-    list_filter = ("status",)
-    inlines = [CourseTranslationInline]
+    list_display = ("slug", "format", "price", "status", "access_days", "event_starts_at")
+    list_filter = ("status", "format")
+    inlines = [CourseTranslationInline, CourseResourceInline]
+
+
+@admin.register(CourseResource)
+class CourseResourceAdmin(admin.ModelAdmin):
+    list_display = ("original_name", "course", "kind", "sort_order", "is_active")
+    list_filter = ("kind", "is_active")
+    inlines = [CourseResourceTranslationInline]
 
 
 @admin.register(Recipe)

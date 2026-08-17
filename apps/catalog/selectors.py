@@ -5,6 +5,8 @@ from apps.catalog.models import (
     Category,
     CategoryTranslation,
     Course,
+    CourseResource,
+    CourseResourceTranslation,
     CourseTranslation,
     Language,
     Recipe,
@@ -55,6 +57,7 @@ def courses_for_public(
     language: Language,
     category_slug: str | None = None,
     search: str | None = None,
+    course_format: str | None = None,
 ) -> QuerySet[Course]:
     qs = Course.objects.filter(
         status=PublishStatus.PUBLISHED,
@@ -62,6 +65,8 @@ def courses_for_public(
     ).distinct()
     if category_slug:
         qs = qs.filter(category__slug=category_slug, category__is_active=True)
+    if course_format:
+        qs = qs.filter(format=course_format)
     if search:
         qs = qs.filter(
             Q(translations__title__icontains=search)
@@ -154,3 +159,39 @@ def get_published_recipe(*, slug: str, language: Language) -> Recipe:
             http_status=404,
         )
     return recipe
+
+
+def admin_resources_for_course(*, course: Course) -> QuerySet[CourseResource]:
+    return (
+        CourseResource.objects.filter(course=course)
+        .prefetch_related("translations__language")
+        .order_by("sort_order", "created_at")
+    )
+
+
+def player_resources_for_course(*, course: Course, language: Language) -> QuerySet[CourseResource]:
+    return (
+        CourseResource.objects.filter(course=course, is_active=True)
+        .prefetch_related(
+            Prefetch(
+                "translations",
+                queryset=CourseResourceTranslation.objects.filter(language=language),
+                to_attr="active_translations",
+            )
+        )
+        .order_by("sort_order", "created_at")
+    )
+
+
+def get_course_resource_or_404(*, resource_id, course: Course | None = None) -> CourseResource:
+    qs = CourseResource.objects.select_related("course")
+    if course is not None:
+        qs = qs.filter(course=course)
+    resource = qs.filter(pk=resource_id).first()
+    if resource is None:
+        raise BusinessError(
+            "RESOURCE_NOT_FOUND",
+            "Recurso no encontrado.",
+            http_status=404,
+        )
+    return resource

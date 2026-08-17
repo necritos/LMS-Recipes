@@ -6,7 +6,8 @@ Documentación detallada por recurso:
 
 - [Idiomas y multi-idioma](./languages.md)
 - [Categorías](./categories.md)
-- [Cursos](./courses.md)
+- [Cursos](./courses.md) (`online` / `in_person`, compras, recursos)
+- [Recursos de curso](./resources.md)
 - [Recetas](./recipes.md)
 
 ## Crear curso (bilingüe)

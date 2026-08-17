@@ -3,13 +3,18 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from apps.catalog.constants import PublishStatus, RecipeAccessType
+from apps.catalog.constants import CourseFormat, CourseResourceKind, PublishStatus, RecipeAccessType
 from apps.common.models import TimeStampedModel, UUIDModel
 
 
 def cover_upload_path(instance, filename: str) -> str:
     folder = instance.__class__.__name__.lower()
     return f"{folder}s/covers/{instance.pk or 'new'}/{filename}"
+
+
+def course_resource_upload_path(instance, filename: str) -> str:
+    course_id = instance.course_id or "new"
+    return f"courses/resources/{course_id}/{instance.pk or 'new'}/{filename}"
 
 
 class Language(UUIDModel, TimeStampedModel):
@@ -79,6 +84,14 @@ class Course(UUIDModel, TimeStampedModel):
         validators=[MinValueValidator(Decimal("0.00"))],
     )
     access_days = models.PositiveIntegerField(default=365)
+    format = models.CharField(
+        max_length=20,
+        choices=CourseFormat.choices,
+        default=CourseFormat.ONLINE,
+    )
+    event_starts_at = models.DateTimeField(null=True, blank=True)
+    event_address = models.CharField(max_length=500, blank=True)
+    maps_url = models.URLField(max_length=1000, blank=True)
     cover_image = models.ImageField(upload_to=cover_upload_path, blank=True)
     status = models.CharField(
         max_length=20,
@@ -92,6 +105,14 @@ class Course(UUIDModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return self.slug
+
+    @property
+    def is_in_person(self) -> bool:
+        return self.format == CourseFormat.IN_PERSON
+
+    @property
+    def is_online(self) -> bool:
+        return self.format == CourseFormat.ONLINE
 
 
 class CourseTranslation(UUIDModel, TimeStampedModel):
@@ -121,6 +142,53 @@ class CourseTranslation(UUIDModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.course.slug} [{self.language.code}]"
+
+
+class CourseResource(UUIDModel, TimeStampedModel):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="resources")
+    kind = models.CharField(
+        max_length=16,
+        choices=CourseResourceKind.choices,
+        default=CourseResourceKind.FILE,
+    )
+    file = models.FileField(upload_to=course_resource_upload_path, max_length=255)
+    original_name = models.CharField(max_length=255, blank=True)
+    content_type = models.CharField(max_length=120, blank=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["sort_order", "created_at"]
+
+    def __str__(self) -> str:
+        return self.original_name or f"resource {self.pk}"
+
+
+class CourseResourceTranslation(UUIDModel, TimeStampedModel):
+    resource = models.ForeignKey(
+        CourseResource,
+        on_delete=models.CASCADE,
+        related_name="translations",
+    )
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.PROTECT,
+        related_name="course_resource_translations",
+    )
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["resource", "language"],
+                name="uniq_course_resource_translation_lang",
+            ),
+        ]
+        ordering = ["language__code"]
+
+    def __str__(self) -> str:
+        return f"{self.title} [{self.language.code}]"
 
 
 class Recipe(UUIDModel, TimeStampedModel):

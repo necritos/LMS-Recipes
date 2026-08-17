@@ -9,3 +9,14 @@ class PublishStatus(models.TextChoices):
 class RecipeAccessType(models.TextChoices):
     LIFETIME = "lifetime", "Acceso de por vida"
     TIMED = "timed", "Acceso por tiempo limitado"
+
+
+class CourseFormat(models.TextChoices):
+    ONLINE = "online", "Online"
+    IN_PERSON = "in_person", "Presencial"
+
+
+class CourseResourceKind(models.TextChoices):
+    PDF = "pdf", "PDF"
+    IMAGE = "image", "Imagen"
+    FILE = "file", "Archivo"

@@ -1,6 +1,6 @@
 from django.db.models import Prefetch
 
-from apps.catalog.models import CourseTranslation, Language, RecipeTranslation
+from apps.catalog.models import Course, CourseTranslation, Language, RecipeTranslation
 from apps.commerce.models import Cart, Purchase
 
 
@@ -43,5 +43,13 @@ def purchases_for_user(*, user, language: Language):
                 to_attr="active_translations",
             ),
         )
+        .order_by("-created_at")
+    )
+
+
+def purchases_for_course(*, course: Course):
+    return (
+        Purchase.objects.filter(course=course)
+        .select_related("user", "order", "access_grant")
         .order_by("-created_at")
     )

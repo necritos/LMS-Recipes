@@ -72,3 +72,5 @@ Estructura de un curso. Textos por idioma. El `bunny_video_id` es global (un vid
 En recetas: `PATCH /admin/recipes/{slug}/` con `{ "bunny_video_id": "..." }` e `ingredients_html` / `preparation_html` en traducciones.
 
 El catálogo público lista el temario **sin** `bunny_video_id` ni `content_html`. Las URLs firmadas y el HTML de lección solo salen en `/api/v1/me/`.
+
+Los cursos `format=in_person` no admiten módulos (`422 IN_PERSON_NO_CURRICULUM`). Recursos descargables: [catalog/resources.md](./catalog/resources.md).

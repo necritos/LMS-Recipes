@@ -58,8 +58,20 @@ def upsert_lesson_translations(*, lesson: Lesson, translations: list[dict]) -> N
         )
 
 
+def assert_course_allows_curriculum(*, course) -> None:
+    from apps.catalog.constants import CourseFormat
+
+    if course.format == CourseFormat.IN_PERSON:
+        raise BusinessError(
+            "IN_PERSON_NO_CURRICULUM",
+            "Los cursos presenciales no tienen módulos ni lecciones.",
+            http_status=422,
+        )
+
+
 @transaction.atomic
 def create_module(*, course, translations: list[dict] | None = None, **fields) -> Module:
+    assert_course_allows_curriculum(course=course)
     module = Module.objects.create(course=course, **fields)
     upsert_module_translations(module=module, translations=translations)
     return module

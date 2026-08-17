@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from apps.catalog.api.serializers_helpers import get_active_translation
+from apps.catalog.models import CourseResource
 from apps.content.models import AccessGrant, Lesson, LessonProgress, Module
 from apps.content.selectors import continue_lesson_for_course
 
@@ -153,13 +154,36 @@ class MeAccessSerializer(serializers.ModelSerializer):
 
 class MeCourseAccessSerializer(MeAccessSerializer):
     access_days = serializers.SerializerMethodField()
+    format = serializers.SerializerMethodField()
+    event_starts_at = serializers.SerializerMethodField()
+    event_address = serializers.SerializerMethodField()
+    maps_url = serializers.SerializerMethodField()
     continue_lesson = serializers.SerializerMethodField()
 
     class Meta(MeAccessSerializer.Meta):
-        fields = MeAccessSerializer.Meta.fields + ("access_days", "continue_lesson")
+        fields = MeAccessSerializer.Meta.fields + (
+            "access_days",
+            "format",
+            "event_starts_at",
+            "event_address",
+            "maps_url",
+            "continue_lesson",
+        )
 
     def get_access_days(self, obj) -> int | None:
         return obj.course.access_days if obj.course_id else None
+
+    def get_format(self, obj) -> str | None:
+        return obj.course.format if obj.course_id else None
+
+    def get_event_starts_at(self, obj):
+        return obj.course.event_starts_at if obj.course_id else None
+
+    def get_event_address(self, obj) -> str | None:
+        return obj.course.event_address if obj.course_id else None
+
+    def get_maps_url(self, obj) -> str | None:
+        return obj.course.maps_url if obj.course_id else None
 
     def get_continue_lesson(self, obj) -> dict | None:
         return continue_lesson_payload(
@@ -192,3 +216,36 @@ class MeLessonProgressWriteSerializer(serializers.ModelSerializer):
 
     def get_lesson_id(self, obj) -> str:
         return str(obj.lesson_id)
+
+
+class MeCourseResourceSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    download_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CourseResource
+        fields = (
+            "id",
+            "kind",
+            "original_name",
+            "content_type",
+            "sort_order",
+            "title",
+            "description",
+            "download_url",
+        )
+
+    def get_title(self, obj) -> str:
+        return get_active_translation(obj, "title") or obj.original_name
+
+    def get_description(self, obj) -> str:
+        return get_active_translation(obj, "description")
+
+    def get_download_url(self, obj) -> str | None:
+        request = self.context.get("request")
+        if not request or not obj.file:
+            return None
+        return request.build_absolute_uri(
+            f"/api/v1/me/courses/{obj.course_id}/resources/{obj.id}/file/"
+        )

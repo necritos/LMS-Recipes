@@ -18,7 +18,7 @@ Google OAuth: [google.md](./google.md) — `GET/PATCH /site/google/`.
 2. **Digital Ocean Spaces** si existen vars `AWS_*` en el servidor.
 3. **Filesystem local** (`MEDIA_ROOT`) en desarrollo.
 
-Todas las `ImageField` (portadas de cursos/recetas, sliders, botones) usan este storage.
+Todas las `ImageField` (portadas de cursos/recetas, sliders, botones) y los `FileField` de recursos de curso usan este storage. Los recursos (`courses/resources/…`) **no** se hacen públicos en Firebase: se sirven solo vía API con compra.
 
 ## GET — no expone el JSON privado
 

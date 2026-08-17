@@ -10,6 +10,7 @@ from apps.catalog.api.public.serializers import (
     PublicRecipeDetailSerializer,
     PublicRecipeListSerializer,
 )
+from apps.catalog.constants import CourseFormat
 from apps.catalog.selectors import (
     categories_for_public,
     courses_for_public,
@@ -63,6 +64,11 @@ class CourseListView(ListAPIView):
             OpenApiParameter("lang", str),
             OpenApiParameter("category", str, description="Slug de categoría"),
             OpenApiParameter("search", str),
+            OpenApiParameter(
+                "course_format",
+                str,
+                description="Filtrar por formato: online | in_person",
+            ),
         ],
     )
     def get(self, request, *args, **kwargs):
@@ -71,10 +77,14 @@ class CourseListView(ListAPIView):
     def get_queryset(self):
         params = self.request.query_params
         language = get_active_language(code=resolve_language_code(params.get("lang")))
+        course_format = (params.get("course_format") or "").strip() or None
+        if course_format and course_format not in CourseFormat.values:
+            course_format = None
         return courses_for_public(
             language=language,
             category_slug=params.get("category") or None,
             search=params.get("search") or None,
+            course_format=course_format,
         )
 
 

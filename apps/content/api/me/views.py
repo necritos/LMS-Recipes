@@ -4,10 +4,18 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.catalog.api.serializers_helpers import get_active_translation
-from apps.catalog.selectors import get_active_language, resolve_language_code
+from apps.catalog.selectors import (
+    get_active_language,
+    get_course_resource_or_404,
+    player_resources_for_course,
+    resolve_language_code,
+)
+from apps.catalog.services.resource_service import resource_file_response
+from apps.common.exceptions import BusinessError
 from apps.common.permissions import HasActiveAccess, IsAuthenticatedUser
 from apps.content.api.me.serializers import (
     MeCourseAccessSerializer,
+    MeCourseResourceSerializer,
     MeLessonProgressWriteSerializer,
     MeModuleSerializer,
     MeRecipeAccessSerializer,
@@ -58,6 +66,45 @@ class MeCourseLessonsView(APIView):
         return Response(
             {"data": {"course_id": str(course.id), "modules": serializer.data}, "meta": {}}
         )
+
+
+class MeCourseResourcesView(APIView):
+    permission_classes = [HasActiveAccess]
+
+    def get_access_target(self):
+        return {"course": get_course_or_404(course_id=self.kwargs["course_id"])}
+
+    @extend_schema(
+        tags=["Me"],
+        parameters=[OpenApiParameter("lang", str, description="Código de idioma (default: es)")],
+    )
+    def get(self, request, course_id):
+        course = get_course_or_404(course_id=course_id)
+        language = _lang(request)
+        resources = player_resources_for_course(course=course, language=language)
+        serializer = MeCourseResourceSerializer(resources, many=True, context={"request": request})
+        return Response(
+            {"data": {"course_id": str(course.id), "resources": serializer.data}, "meta": {}}
+        )
+
+
+class MeCourseResourceFileView(APIView):
+    permission_classes = [HasActiveAccess]
+
+    def get_access_target(self):
+        return {"course": get_course_or_404(course_id=self.kwargs["course_id"])}
+
+    @extend_schema(tags=["Me"])
+    def get(self, request, course_id, resource_id):
+        course = get_course_or_404(course_id=course_id)
+        resource = get_course_resource_or_404(resource_id=resource_id, course=course)
+        if not resource.is_active:
+            raise BusinessError(
+                "RESOURCE_NOT_FOUND",
+                "Recurso no encontrado.",
+                http_status=404,
+            )
+        return resource_file_response(resource=resource)
 
 
 class MeRecipeVideoView(APIView):

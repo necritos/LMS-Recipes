@@ -78,7 +78,7 @@ Ver [admin/site/README.md](./admin/site/README.md) y [public/site.md](./public/s
 
 ## Índice — Contenido y video (Fase 3)
 
-Ver [admin/content.md](./admin/content.md), [admin/site/bunny.md](./admin/site/bunny.md) y [me/content.md](./me/content.md).
+Ver [admin/content.md](./admin/content.md), [admin/catalog/resources.md](./admin/catalog/resources.md), [admin/site/bunny.md](./admin/site/bunny.md) y [me/content.md](./me/content.md).
 
 ## Índice — E-commerce y Stripe (Fase 4)
 

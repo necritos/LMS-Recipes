@@ -40,6 +40,10 @@ class PublicCourseListSerializer(serializers.ModelSerializer):
             "description",
             "price",
             "access_days",
+            "format",
+            "event_starts_at",
+            "event_address",
+            "maps_url",
             "category_slug",
             "cover_image_url",
         )
@@ -79,9 +83,12 @@ class PublicCourseDetailSerializer(PublicCourseListSerializer):
         return get_active_translation(obj, "meta_description")
 
     def get_modules(self, obj) -> list:
+        from apps.catalog.constants import CourseFormat
         from apps.content.api.me.serializers import PublicCurriculumModuleSerializer
         from apps.content.selectors import public_modules_for_course
 
+        if obj.format == CourseFormat.IN_PERSON:
+            return []
         translations = getattr(obj, "active_translations", None)
         if not translations:
             return []

@@ -5,6 +5,8 @@ from apps.catalog.models import (
     Category,
     CategoryTranslation,
     Course,
+    CourseResource,
+    CourseResourceTranslation,
     CourseTranslation,
     Language,
     Recipe,
@@ -79,6 +81,10 @@ class AdminCourseSerializer(serializers.ModelSerializer):
             "category_id",
             "price",
             "access_days",
+            "format",
+            "event_starts_at",
+            "event_address",
+            "maps_url",
             "status",
             "sort_order",
             "cover_image_url",
@@ -102,10 +108,100 @@ class AdminCourseWriteSerializer(JSONTranslationsMixin, serializers.Serializer):
     category_id = serializers.UUIDField(required=False, allow_null=True)
     price = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0)
     access_days = serializers.IntegerField(min_value=1, default=365)
+    format = serializers.ChoiceField(choices=["online", "in_person"], required=False)
+    event_starts_at = serializers.DateTimeField(required=False, allow_null=True)
+    event_address = serializers.CharField(required=False, allow_blank=True, max_length=500)
+    maps_url = serializers.URLField(required=False, allow_blank=True, max_length=1000)
     status = serializers.ChoiceField(choices=["draft", "published"], default="draft")
     sort_order = serializers.IntegerField(min_value=0, default=0)
     cover_image = serializers.ImageField(required=False, allow_null=True)
     translations = serializers.ListField(child=TranslationInputSerializer())
+
+
+class AdminCourseResourceTranslationSerializer(serializers.ModelSerializer):
+    language_code = serializers.CharField(source="language.code", read_only=True)
+
+    class Meta:
+        model = CourseResourceTranslation
+        fields = ("id", "language_code", "title", "description")
+
+
+class AdminCourseResourceSerializer(serializers.ModelSerializer):
+    translations = AdminCourseResourceTranslationSerializer(many=True, read_only=True)
+    download_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CourseResource
+        fields = (
+            "id",
+            "course_id",
+            "kind",
+            "original_name",
+            "content_type",
+            "sort_order",
+            "is_active",
+            "download_url",
+            "translations",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "course_id", "created_at", "updated_at")
+
+    def get_download_url(self, obj) -> str | None:
+        request = self.context.get("request")
+        if not request or not obj.file:
+            return None
+        return request.build_absolute_uri(f"/api/v1/admin/resources/{obj.id}/file/")
+
+
+class AdminCourseResourceWriteSerializer(JSONTranslationsMixin, serializers.Serializer):
+    file = serializers.FileField(required=False)
+    kind = serializers.ChoiceField(choices=["pdf", "image", "file"], required=False)
+    sort_order = serializers.IntegerField(min_value=0, default=0)
+    is_active = serializers.BooleanField(default=True)
+    translations = serializers.ListField(child=TranslationInputSerializer(), required=False)
+
+    def validate(self, attrs):
+        creating = self.context.get("creating", False)
+        if creating and not attrs.get("file"):
+            raise serializers.ValidationError({"file": "Debes subir un archivo."})
+        if creating and not attrs.get("translations"):
+            raise serializers.ValidationError(
+                {"translations": "Debes incluir al menos una traducción."}
+            )
+        return attrs
+
+
+class AdminCoursePurchaseSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    user = serializers.SerializerMethodField()
+    order_id = serializers.UUIDField(read_only=True)
+    paid_at = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(read_only=True)
+    expires_at = serializers.SerializerMethodField()
+    is_lifetime = serializers.SerializerMethodField()
+
+    def get_user(self, obj) -> dict:
+        user = obj.user
+        full_name = f"{user.first_name} {user.last_name}".strip() or user.email
+        return {
+            "id": str(user.id),
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "full_name": full_name,
+        }
+
+    def get_paid_at(self, obj):
+        return obj.order.paid_at if obj.order_id else None
+
+    def get_expires_at(self, obj):
+        grant = obj.access_grant
+        return grant.expires_at if grant else None
+
+    def get_is_lifetime(self, obj) -> bool:
+        grant = obj.access_grant
+        return grant is not None and grant.expires_at is None
 
 
 class AdminRecipeTranslationSerializer(serializers.ModelSerializer):

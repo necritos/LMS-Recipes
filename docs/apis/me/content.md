@@ -42,7 +42,41 @@ Temario con descripción de módulo/lección, **contenido HTML** de la lección 
 
 Si la lección no tiene video: `"video": null`.
 
-En el **catálogo público** el temario solo trae `title` + `description` (sin `content_html` ni video).
+En el **catálogo público** el temario solo trae `title` + `description` (sin `content_html` ni video). Un curso `in_person` no tiene módulos.
+
+## GET `/api/v1/me/courses/{id}/resources/`
+
+Solo cursos **online** con compra activa. Lista PDF/imagen/archivo con título por `?lang=`. La URL de descarga pasa por la API (no es el enlace público de Firebase).
+
+```json
+{
+  "data": {
+    "course_id": "uuid",
+    "resources": [
+      {
+        "id": "uuid",
+        "kind": "pdf",
+        "original_name": "guia.pdf",
+        "content_type": "application/pdf",
+        "sort_order": 0,
+        "title": "Guía de recetas",
+        "description": "Material complementario",
+        "download_url": "http://localhost:8000/api/v1/me/courses/{id}/resources/{resource_id}/file/"
+      }
+    ]
+  },
+  "meta": {}
+}
+```
+
+Descarga (binario, `Content-Disposition: attachment`):
+
+```http
+GET /api/v1/me/courses/{id}/resources/{resource_id}/file/
+Authorization: Bearer <access_user>
+```
+
+Un presencial responde `resources: []`. Sin compra: `403 ACCESS_DENIED`.
 
 ## GET `/api/v1/me/recipes/{id}/`
 
@@ -80,6 +114,6 @@ Solo el bloque `video` (compatibilidad). Preferible el detalle de arriba.
 | 401 | — | Sin JWT de usuario |
 | 403 | `ACCESS_DENIED` | Sin compra / grant |
 | 403 | `ACCESS_EXPIRED` | Grant con `expires_at` pasado |
-| 404 | `COURSE_NOT_FOUND` / `RECIPE_NOT_FOUND` | ID inexistente |
+| 404 | `COURSE_NOT_FOUND` / `RECIPE_NOT_FOUND` / `RESOURCE_NOT_FOUND` | ID inexistente |
 | 404 | `VIDEO_NOT_FOUND` | Receta/lección sin `bunny_video_id` (en endpoints de video) |
 | 503 | `BUNNY_NOT_CONFIGURED` | Bunny no activado en admin |

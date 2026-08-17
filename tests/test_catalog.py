@@ -23,7 +23,9 @@ class TestPublicCatalog:
     def test_public_courses_filter_by_language(self, api_client, published_course):
         es = api_client.get("/api/v1/public/courses/?lang=es")
         assert es.status_code == 200
-        assert es.json()["results"][0]["title"] == "Curso de Pasta"
+        row = es.json()["results"][0]
+        assert row["title"] == "Curso de Pasta"
+        assert row["format"] == "online"
 
         en = api_client.get("/api/v1/public/courses/?lang=en")
         assert en.status_code == 200
@@ -35,6 +37,7 @@ class TestPublicCatalog:
         data = response.json()["data"]
         assert data["slug"] == "curso-pasta"
         assert data["meta_title"] == "Pasta ES"
+        assert data["format"] == "online"
 
     def test_draft_course_not_public(self, api_client, staff_client, languages):
         staff_client.post(

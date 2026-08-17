@@ -4,6 +4,8 @@ from apps.content.api.me.views import (
     MeCourseLessonsView,
     MeCourseListView,
     MeCourseProgressView,
+    MeCourseResourceFileView,
+    MeCourseResourcesView,
     MeLessonCompleteView,
     MeLessonViewView,
     MeRecipeDetailView,
@@ -17,6 +19,16 @@ urlpatterns = [
         "courses/<uuid:course_id>/lessons/",
         MeCourseLessonsView.as_view(),
         name="me-course-lessons",
+    ),
+    path(
+        "courses/<uuid:course_id>/resources/",
+        MeCourseResourcesView.as_view(),
+        name="me-course-resources",
+    ),
+    path(
+        "courses/<uuid:course_id>/resources/<uuid:resource_id>/file/",
+        MeCourseResourceFileView.as_view(),
+        name="me-course-resource-file",
     ),
     path(
         "progress/<uuid:course_id>/",

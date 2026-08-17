@@ -14,6 +14,13 @@ logger = logging.getLogger(__name__)
 
 _cache: tuple[str, Storage] | None = None
 
+PRIVATE_MEDIA_PREFIXES = ("courses/resources/",)
+
+
+def _is_private_media_name(name: str) -> bool:
+    normalized = (name or "").lstrip("/")
+    return any(normalized.startswith(prefix) for prefix in PRIVATE_MEDIA_PREFIXES)
+
 
 def invalidate_media_storage_cache() -> None:
     global _cache
@@ -164,10 +171,13 @@ class FirebaseStorage(Storage):
             content.seek(0)
         content_type = getattr(content, "content_type", None) or "application/octet-stream"
         blob.upload_from_file(content, content_type=content_type)
-        try:
-            blob.make_public()
-        except Exception:
-            logger.info("No se pudo hacer público el blob (ACL uniforme); se usa URL alt=media.")
+        if not _is_private_media_name(name):
+            try:
+                blob.make_public()
+            except Exception:
+                logger.info(
+                    "No se pudo hacer público el blob (ACL uniforme); se usa URL alt=media."
+                )
         return name
 
     def url(self, name):

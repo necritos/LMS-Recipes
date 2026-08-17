@@ -16,7 +16,8 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 | [catalog/README.md](./catalog/README.md) | Índice del catálogo admin |
 | [catalog/languages.md](./catalog/languages.md) | **Idiomas y sistema multi-idioma** |
 | [catalog/categories.md](./catalog/categories.md) | CRUD categorías |
-| [catalog/courses.md](./catalog/courses.md) | CRUD cursos |
+| [catalog/courses.md](./catalog/courses.md) | CRUD cursos (`online` / `in_person`) y compras |
+| [catalog/resources.md](./catalog/resources.md) | Recursos descargables de cursos online |
 | [catalog/recipes.md](./catalog/recipes.md) | CRUD recetas |
 
 ## Sitio (CMS)
