@@ -62,19 +62,28 @@ jobs:
 
     steps:
       - name: Deploy to DigitalOcean Droplet
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script_stop: true
-          script: |
-            set -euo pipefail
-            APP_DIR="${{ secrets.DEPLOY_PATH }}"
-            # Repo owned by app user; root needs safe.directory for git.
-            git config --global --add safe.directory "$APP_DIR"
-            cd "$APP_DIR"
-            git fetch origin main
-            git reset --hard origin/main
-            chmod +x deploy/remote_deploy.sh
-            bash deploy/remote_deploy.sh
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          umask 077
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          ssh -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=accept-new \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            bash -s -- "$DEPLOY_PATH" <<'REMOTE'
+          set -euo pipefail
+          APP_DIR="$1"
+          git config --global --add safe.directory "$APP_DIR"
+          cd "$APP_DIR"
+          git fetch origin main
+          git reset --hard origin/main
+          chmod +x deploy/remote_deploy.sh
+          bash deploy/remote_deploy.sh
+          REMOTE
