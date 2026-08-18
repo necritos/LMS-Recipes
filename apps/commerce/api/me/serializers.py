@@ -54,6 +54,8 @@ class CartSerializer(serializers.Serializer):
 
 class CheckoutSessionSerializer(serializers.Serializer):
     lang = serializers.CharField(required=False, allow_blank=True, default="es")
+    stripe_success_url = serializers.URLField(required=False, allow_blank=True)
+    stripe_cancel_url = serializers.URLField(required=False, allow_blank=True)
 
 
 class MePurchaseSerializer(serializers.ModelSerializer):

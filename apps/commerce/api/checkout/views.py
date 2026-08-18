@@ -18,5 +18,10 @@ class CreateCheckoutSessionView(APIView):
         lang = resolve_language_code(
             serializer.validated_data.get("lang") or request.query_params.get("lang")
         )
-        payload = create_checkout_session(user=request.user, lang=lang)
+        payload = create_checkout_session(
+            user=request.user,
+            lang=lang,
+            stripe_success_url=serializer.validated_data.get("stripe_success_url") or None,
+            stripe_cancel_url=serializer.validated_data.get("stripe_cancel_url") or None,
+        )
         return Response({"data": payload, "meta": {}})

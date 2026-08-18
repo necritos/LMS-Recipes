@@ -88,6 +88,7 @@ Ver [admin/content.md](./admin/content.md), [admin/catalog/resources.md](./admin
 | GET/POST/DELETE | `/me/cart/` | [me/cart.md](./me/cart.md) |
 | DELETE | `/me/cart/items/{id}/` | [me/cart.md](./me/cart.md) |
 | POST | `/checkout/create-session/` | [checkout.md](./checkout.md) |
+| GET | `/admin/payments/` | [admin/payments.md](./admin/payments.md) |
 | POST | `/webhooks/stripe/` | [webhooks/stripe.md](./webhooks/stripe.md) |
 
 ## Índice — APIs de usuario (Fase 5)

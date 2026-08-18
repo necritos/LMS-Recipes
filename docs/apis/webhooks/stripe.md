@@ -6,9 +6,11 @@ Sin JWT. Stripe firma el body (`Stripe-Signature`). El signing secret se configu
 
 | Evento | Efecto |
 |--------|--------|
-| `checkout.session.completed` | Order `paid`, Purchase, AccessGrant, vacía carrito, email |
-| `payment_intent.payment_failed` | Order `failed` (si existe) |
-| `checkout.session.expired` | Order `failed` (si existe) |
+| `checkout.session.completed` | Order `paid`, Purchase, AccessGrant, vacía carrito, email, intento `succeeded` |
+| `payment_intent.payment_failed` | Order `failed`, intento `failed` (código y mensaje de Stripe) |
+| `checkout.session.expired` | Order `canceled`, intento `expired` |
+
+Cada intento queda en `PaymentAttempt` (append-only). El admin los lista en [admin/payments.md](../admin/payments.md).
 
 El mismo `event.id` se ignora (idempotencia, HTTP 200 `duplicate`).
 

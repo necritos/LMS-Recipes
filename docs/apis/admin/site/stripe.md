@@ -105,7 +105,8 @@ Si omites las keys o envías `""`, se conservan las ya guardadas.
 ## Flujo de compra (APIs)
 
 1. Usuario: `POST /api/v1/me/cart/` `{ "course_id" }` o `{ "recipe_id" }`
-2. `POST /api/v1/checkout/create-session/` → `{ checkout_url, session_id, order_id }`
+2. `POST /api/v1/checkout/create-session/` → `{ checkout_url, session_id, order_id }`  
+   Opcional: `stripe_success_url` y `stripe_cancel_url` del dominio del frontend (si no, las del admin).
 3. Frontend redirige a `checkout_url` (tarjeta / Apple Pay / Google Pay).
 4. Stripe llama `POST /api/v1/webhooks/stripe/` → Order pagada + AccessGrant + email.
 5. El video sigue exigiendo grant (`GET /me/courses/{id}/lessons/`).

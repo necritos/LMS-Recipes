@@ -145,7 +145,7 @@ Apple Pay / Google Pay salen solos en `checkout.stripe.com`. No hay que registra
 
 Local: `stripe listen --forward-to localhost:8000/api/v1/webhooks/stripe/` y usa el `whsec_` que imprime el CLI.
 
-**Settings → Checkout:** logo y color. Las URLs de success/cancel las pone el backend (campos de abajo), no el Dashboard.
+**Settings → Checkout:** logo y color. Las URLs de success/cancel las pone el backend (admin o el body de `create-session`), no el Dashboard.
 
 Tarjeta de prueba: `4242 4242 4242 4242` (fecha futura, CVC cualquiera). Rechazo: `4000 0000 0000 9995`.
 
@@ -175,7 +175,7 @@ Authorization: Bearer <staff>
 | `pk_test_` / `pk_live_` | `stripe_publishable_key` |
 | `whsec_` | `stripe_webhook_secret` |
 | Test / Live | `stripe_mode` (debe coincidir con el prefijo de la secret) |
-| URLs del frontend | `stripe_success_url`, `stripe_cancel_url` |
+| URLs del frontend | `stripe_success_url`, `stripe_cancel_url` (fallback; el checkout puede enviar otras del mismo allowlist) |
 
 `GET`: `stripe_configured` y `stripe_webhook_configured`. Secret y `whsec_` no se devuelven.  
 En live: mismas pantallas con Test mode OFF → `sk_live_` / `pk_live_` y `stripe_mode: "live"`. El webhook de live es **otro** endpoint/secret.

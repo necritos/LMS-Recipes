@@ -3,9 +3,10 @@ import logging
 from django.db import transaction
 from django.utils import timezone
 
-from apps.commerce.models import Order, Purchase, StripeEvent
+from apps.commerce.models import Order, PaymentAttempt, Purchase, StripeEvent
 from apps.commerce.services.cart_service import get_or_create_cart
 from apps.commerce.services.grants import upsert_access_grant
+from apps.commerce.services.payment_attempt_service import record_payment_attempt
 from apps.commerce.services.stripe_client import construct_stripe_event
 from apps.common.exceptions import BusinessError
 from apps.notifications.services.mail import dispatch_transactional_email
@@ -62,9 +63,18 @@ def process_stripe_event(event) -> dict:
     payload = _as_dict(event.get("data") or {}).get("object") or {}
     payload = _as_dict(payload)
     if event_type == "checkout.session.completed":
-        fulfill_checkout_session(payload)
-    elif event_type in {"payment_intent.payment_failed", "checkout.session.expired"}:
-        mark_order_failed(payload)
+        fulfill_checkout_session(payload, event_id=event_id, event_type=event_type)
+    elif event_type == "payment_intent.payment_failed":
+        mark_order_failed(
+            payload, event_id=event_id, event_type=event_type, outcome=PaymentAttempt.Outcome.FAILED
+        )
+    elif event_type == "checkout.session.expired":
+        mark_order_failed(
+            payload,
+            event_id=event_id,
+            event_type=event_type,
+            outcome=PaymentAttempt.Outcome.EXPIRED,
+        )
 
     return {"status": "processed", "event_id": event_id, "type": event_type}
 
@@ -93,13 +103,29 @@ def _order_from_stripe_object(obj: dict) -> Order | None:
     return None
 
 
-def fulfill_checkout_session(session: dict) -> None:
+def _failure_details(obj: dict) -> tuple[str, str]:
+    err = _as_dict(obj.get("last_payment_error") or {})
+    code = str(err.get("decline_code") or err.get("code") or "")
+    message = str(err.get("message") or "")
+    if not message and obj.get("object") == "checkout.session":
+        message = "La sesión de checkout expiró."
+    return code, message
+
+
+def fulfill_checkout_session(session: dict, *, event_id: str = "", event_type: str = "") -> None:
     session = _as_dict(session)
     order = _order_from_stripe_object(session)
     if order is None:
         logger.warning("Webhook checkout sin order: %s", session.get("id"))
         return
     if order.status == Order.Status.PAID:
+        record_payment_attempt(
+            order=order,
+            outcome=PaymentAttempt.Outcome.SUCCEEDED,
+            stripe_event_id=event_id,
+            stripe_event_type=event_type or "checkout.session.completed",
+            stripe_payment_intent=_payment_intent_id(session),
+        )
         return
 
     order.status = Order.Status.PAID
@@ -128,15 +154,44 @@ def fulfill_checkout_session(session: dict) -> None:
         )
 
     get_or_create_cart(user=order.user).items.all().delete()
+    record_payment_attempt(
+        order=order,
+        outcome=PaymentAttempt.Outcome.SUCCEEDED,
+        stripe_event_id=event_id,
+        stripe_event_type=event_type or "checkout.session.completed",
+        stripe_payment_intent=order.stripe_payment_intent,
+    )
     _send_purchase_email(order)
 
 
-def mark_order_failed(obj: dict) -> None:
-    order = _order_from_stripe_object(_as_dict(obj))
+def mark_order_failed(
+    obj: dict,
+    *,
+    event_id: str = "",
+    event_type: str = "",
+    outcome: str = PaymentAttempt.Outcome.FAILED,
+) -> None:
+    obj = _as_dict(obj)
+    order = _order_from_stripe_object(obj)
     if order is None or order.status == Order.Status.PAID:
         return
-    order.status = Order.Status.FAILED
-    order.save(update_fields=["status", "updated_at"])
+    code, message = _failure_details(obj)
+    intent = _payment_intent_id(obj)
+    if intent and not order.stripe_payment_intent:
+        order.stripe_payment_intent = intent
+    order.status = (
+        Order.Status.CANCELED if outcome == PaymentAttempt.Outcome.EXPIRED else Order.Status.FAILED
+    )
+    order.save(update_fields=["status", "stripe_payment_intent", "updated_at"])
+    record_payment_attempt(
+        order=order,
+        outcome=outcome,
+        stripe_event_id=event_id,
+        stripe_event_type=event_type,
+        stripe_payment_intent=intent,
+        failure_code=code,
+        failure_message=message,
+    )
 
 
 def _send_purchase_email(order: Order) -> None:

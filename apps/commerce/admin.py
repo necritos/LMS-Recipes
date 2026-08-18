@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from apps.commerce.models import Cart, CartItem, Order, OrderItem, Purchase, StripeEvent
+from apps.commerce.models import (
+    Cart,
+    CartItem,
+    Order,
+    OrderItem,
+    PaymentAttempt,
+    Purchase,
+    StripeEvent,
+)
 
 
 class CartItemInline(admin.TabularInline):
@@ -24,6 +32,13 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "status", "total", "currency", "paid_at")
     list_filter = ("status",)
     inlines = [OrderItemInline]
+
+
+@admin.register(PaymentAttempt)
+class PaymentAttemptAdmin(admin.ModelAdmin):
+    list_display = ("outcome", "customer_email", "amount", "currency", "created_at")
+    list_filter = ("outcome",)
+    search_fields = ("customer_email", "stripe_session_id", "stripe_event_id")
 
 
 @admin.register(Purchase)

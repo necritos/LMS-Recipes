@@ -240,7 +240,7 @@ Prefijo base: `/api/v1/`
 | `/api/v1/auth/` | Registro/login | login, register, Google OAuth, reset password |
 | `/api/v1/me/` | Usuario autenticado | Carrito, compras, biblioteca, progreso, video firmado |
 | `/api/v1/checkout/` | Usuario autenticado | Crear sesión Stripe Checkout |
-| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, Stripe, Mailchimp, Google, usuarios, dashboard |
+| `/api/v1/admin/` | Staff | CRUD catálogo, CMS, Firebase, Bunny, Stripe, Mailchimp, Google, usuarios, pagos, dashboard |
 | `/api/v1/webhooks/stripe/` | Stripe | Eventos de pago |
 
 ### Contrato de respuesta (heredado de BEDERR)
@@ -467,6 +467,7 @@ Prefijo base: `/api/v1/`
 - [x] API carrito: `GET/POST/DELETE /api/v1/me/cart/` y `DELETE /api/v1/me/cart/items/{id}/` *(sin PATCH: productos digitales, cantidad 1)*
 - [x] Servicio `create_checkout_session()`
 - [x] Endpoint `POST /api/v1/checkout/create-session/`
+- [x] Checkout acepta `stripe_success_url` / `stripe_cancel_url` del frontend (allowlist de dominios)
 - [x] Credenciales Stripe vía admin `GET/PATCH /admin/site/stripe/` (como Firebase/Bunny; no en env)
 - [x] Webhook `POST /api/v1/webhooks/stripe/` con verificación de firma
 - [x] Handler `checkout.session.completed` → Order pagada + Purchase + AccessGrant
@@ -475,12 +476,14 @@ Prefijo base: `/api/v1/`
 - [x] Template email confirmación de compra (`notifications`)
 - [x] Task Celery `notifications.send_purchase_confirmation`
 - [x] Tests de carrito, checkout y webhook (Stripe mockeado + firma inválida)
+- [x] Modelo `PaymentAttempt` + API admin `GET /api/v1/admin/payments/` (correctos y fallidos)
 
 #### Criterio de aceptación
 
 - [x] Compra (webhook `checkout.session.completed`) otorga AccessGrant al producto
 - [x] Email de confirmación de compra enviado
 - [x] Webhook rechaza requests sin firma válida
+- [x] Admin lista intentos de pago (`/admin/payments/`)
 
 **Fase completada:** ✅
 
@@ -529,6 +532,7 @@ Prefijo base: `/api/v1/`
 - [x] API `GET /api/v1/admin/users/` — listado paginado *(implementado en Fase 2)*
 - [x] API `GET /api/v1/admin/users/{id}/` — detalle **con historial de compras** *(detalle en Fase 2; `purchases` real en Fase 4)*
 - [x] API `GET /api/v1/admin/courses/{slug}/purchases/` — listado de compras de un curso (presencial u online) *(implementado con formato de curso)*
+- [x] API `GET /api/v1/admin/payments/` — intentos de pago (iniciados, correctos, fallidos, expirados) *(implementado en Fase 4)*
 - [x] API gestión idiomas: activar/desactivar (`/admin/languages/`) *(implementado en Fase 2)*
 - [x] Documentar config Stripe (admin `/admin/site/stripe/`, toggle test/live; no env) *(implementado en Fase 4)*
 - [x] Endpoint `GET /api/v1/admin/dashboard/revenue/` — serie temporal ingresos (JSON)

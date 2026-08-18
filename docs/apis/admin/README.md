@@ -38,6 +38,7 @@ Panel administrativo — JWT `type=staff` vía `POST /admin/auth/login/`.
 | Documento | Descripción |
 |-----------|-------------|
 | [site/stripe.md](./site/stripe.md) | Keys, webhook, Apple Pay / Google Pay (admin, no env) |
+| [payments.md](./payments.md) | Intentos de pago (correctos y fallidos) |
 
 ## Mailchimp
 

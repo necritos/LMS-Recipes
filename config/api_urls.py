@@ -11,6 +11,7 @@ urlpatterns = [
     path("admin/", include("apps.site.api.admin.urls")),
     path("admin/", include("apps.content.api.admin.urls")),
     path("admin/", include("apps.analytics.api.admin.urls")),
+    path("admin/", include("apps.commerce.api.admin.urls")),
     path("me/", include("apps.content.api.me.urls")),
     path("me/", include("apps.commerce.api.me.urls")),
     path("checkout/", include("apps.commerce.api.checkout.urls")),

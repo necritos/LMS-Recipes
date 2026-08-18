@@ -73,6 +73,33 @@ class Order(UUIDModel, TimeStampedModel):
         return f"order {self.pk} {self.status}"
 
 
+class PaymentAttempt(UUIDModel, TimeStampedModel):
+    class Outcome(models.TextChoices):
+        STARTED = "started", "Iniciado"
+        SUCCEEDED = "succeeded", "Correcto"
+        FAILED = "failed", "Fallido"
+        EXPIRED = "expired", "Expirado"
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payment_attempts")
+    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name="payment_attempts")
+    outcome = models.CharField(max_length=20, choices=Outcome.choices)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default="eur")
+    customer_email = models.EmailField(blank=True)
+    stripe_session_id = models.CharField(max_length=255, blank=True)
+    stripe_payment_intent = models.CharField(max_length=255, blank=True)
+    stripe_event_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    stripe_event_type = models.CharField(max_length=120, blank=True)
+    failure_code = models.CharField(max_length=80, blank=True)
+    failure_message = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"payment {self.outcome} {self.pk}"
+
+
 class OrderItem(UUIDModel, TimeStampedModel):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     course = models.ForeignKey(

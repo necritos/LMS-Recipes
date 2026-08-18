@@ -1,7 +1,7 @@
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q, QuerySet
 
 from apps.catalog.models import Course, CourseTranslation, Language, RecipeTranslation
-from apps.commerce.models import Cart, Purchase
+from apps.commerce.models import Cart, PaymentAttempt, Purchase
 
 
 def cart_for_user(*, user, language: Language | None = None) -> Cart:
@@ -53,3 +53,21 @@ def purchases_for_course(*, course: Course):
         .select_related("user", "order", "access_grant")
         .order_by("-created_at")
     )
+
+
+def payment_attempts_for_admin(
+    *, outcome: str | None = None, search: str = ""
+) -> QuerySet[PaymentAttempt]:
+    qs = PaymentAttempt.objects.select_related("user", "order").prefetch_related("order__items")
+    if outcome in PaymentAttempt.Outcome.values:
+        qs = qs.filter(outcome=outcome)
+    if search:
+        qs = qs.filter(
+            Q(customer_email__icontains=search)
+            | Q(user__email__icontains=search)
+            | Q(user__first_name__icontains=search)
+            | Q(user__last_name__icontains=search)
+            | Q(stripe_session_id__icontains=search)
+            | Q(stripe_payment_intent__icontains=search)
+        )
+    return qs.order_by("-created_at")
